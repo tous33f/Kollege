@@ -2,6 +2,7 @@ import {asyncHandler} from "../utils/AsyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
 import { con } from "../index.js"
+import { getUserCommunityId } from "../utils/UserCommunityId.js"
 
 //post
 const createCommunity=asyncHandler( async(req,res)=>{
@@ -102,20 +103,135 @@ const joinCommunity=asyncHandler(async(req,res)=>{
 
 })
 
-const cancelJoinRequest=asyncHandler(async(req,res)=>{
-    const {comm_name}=req.body
+const leaveCommunity=asyncHandler(async (req,res)=>{
     let rows,fields;
-
-    [rows,fields]=await con.execute(`select user_id from kollege.User where username=?`,[req.user.username])
-    let {user_id}=rows[0]
+    const {comm_name,removed_username}=req.body
+    const {username,role}=req.user
+    let user_id,community_id
+    if(role=="Owner" && !removed_username){
+        throw new ApiError(401,"User is the owner of community so cannot leave")
+    }
+    if(removed_username && role!="Member"){
+        let output=await getUserCommunityId(removed_username,comm_name)
+        user_id=output.user_id
+        community_id=output.community_id
+    }
+    else{
+        let output=await getUserCommunityId(username,comm_name)
+        user_id=output.user_id
+        community_id=output.community_id
+    }
+    //check if user is member of community
     try{
-        [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[comm_name])
+        [rows,fields]=await con.execute(`select user_id,community_id from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
     }
     catch(err){
         throw new ApiError(401,err.message)
     }
-    let {community_id}=rows[0]
+    if(rows.length<1){
+        throw new ApiError(401,"User is not member of given communiy so cannot leave")
+    }
+    //remove from User_has_Community
+    try{
+        await con.execute(`delete from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User has successfully left the community")
+    )
+} )
 
+const cancelJoinRequest=asyncHandler(async(req,res)=>{
+    const {comm_name,updated_username}=req.body
+    let rows,fields;
+    if(updated_username){
+        const {username}=req.user
+        const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+        //getting user role
+        try{
+            [rows,fields]=await con.execute(`select role from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
+            if(rows.length<1){
+                throw new Error("User cancelling join request is not member of given community")
+            }
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        let {role}=rows[0]
+        if(role=="Member"){
+        throw new ApiError(401,"User does not has privilege to cancel join requests")
+        }
+        //checking if updated_user has requested to join the community or not
+        try{
+            [rows,fields]=await con.execute(`select user_id from kollege.User where username=?`,[updated_username])
+            if(rows.length<1){
+                throw new Error("User whose request is to be cancelled does not exist")
+            }
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        let updated_user_id=rows[0].user_id
+        try{
+            [rows,fields]=await con.execute(`select user_id,community_id from kollege.Community_Requests where user_id=? and community_id=?`,[updated_user_id,community_id])
+            if(rows.length<1){
+                throw new Error("User has not requested to join the community")
+            }
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        //cancel request
+        try{
+            await con.execute(`delete from kollege.Community_Requests where user_id=? and community_id=?`,[updated_user_id,community_id])
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        res.status(201).json(
+            new ApiResponse(201,"Request cancelled successfully")
+        )
+    }
+
+    else{
+        const {username}=req.user
+        const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+
+        //check if user has actually requested to join or not
+        try{
+            [rows,fields]=await con.execute(`select user_id,community_id from kollege.Community_Requests where user_id=? and community_id=?`,[user_id,community_id])
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        if(rows.length<1){
+            throw new ApiError(401,"User has not requested to join the given community")
+        }
+
+        //cancel join request
+        try{
+            [rows,fields]=await con.execute(`delete from kollege.Community_Requests where user_id=? and community_id=?`,[user_id,community_id])
+        }
+        catch(err){
+            throw new ApiError(401,err.message)
+        }
+        res.status(201).json(
+            new ApiResponse(201,"Request cancelled successfully",{})
+        )
+    }
+
+})
+
+const acceptJoinRequest=asyncHandler(async(req,res)=>{
+    let rows,fields;
+    const {updated_username,comm_name}=req.body
+    let {role}=req.user
+    let {user_id,community_id}=await getUserCommunityId(updated_username,comm_name)
+    if(role=="Member"){
+        throw new ApiError(401,"User does has privilege to accept join requests")
+    }
     //check if user has actually requested to join or not
     try{
         [rows,fields]=await con.execute(`select user_id,community_id from kollege.Community_Requests where user_id=? and community_id=?`,[user_id,community_id])
@@ -126,19 +242,142 @@ const cancelJoinRequest=asyncHandler(async(req,res)=>{
     if(rows.length<1){
         throw new ApiError(401,"User has not requested to join the given community")
     }
-
-    //cancel join request
+    //accept user join request
     try{
-        [rows,fields]=await con.execute(`delete from kollege.Community_Requests where user_id=? and community_id=?`,[user_id,community_id])
+        await con.execute(`delete from kollege.Community_Requests where user_id=? and community_id=?`,[user_id,community_id])
+        await con.execute(`insert into kollege.User_has_Community(user_id,community_id) values(?,?)`,[user_id,community_id])
     }
     catch(err){
         throw new ApiError(401,err.message)
     }
     res.status(201).json(
-        new ApiResponse(201,"Request cancelled successfully",{})
+        new ApiResponse(201,"Request accepted successfully")
     )
-
 })
+
+const updateCommunityName=asyncHandler(async (req,res)=>{
+    let rows,fields;
+    const {comm_name,new_comm_name}=req.body
+    const {username,role}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    if(role=="Member"){
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    //check if new username already exists
+    try{
+        [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[new_comm_name])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    if(rows.length>0){
+        throw new ApiError(401,"Community name already exists")
+    }
+    //update comm_name
+    try{
+        await con.execute(`update kollege.Community set comm_name=? where community_id=?`,[new_comm_name,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community name updated successfully",{})
+    )
+} )
+
+const updateCommunityFullname=asyncHandler(async (req,res)=>{
+    const {comm_name,new_fullname}=req.body
+    const {username,role}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    if(role=="Member"){
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    //update fullname
+    try{
+        await con.execute(`update kollege.Community set fullname=? where community_id=?`,[new_fullname,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community fullname updated successfully",{})
+    )
+} )
+
+const updateCommunityAbout=asyncHandler(async (req,res)=>{
+    const {comm_name,new_about}=req.body
+    const {username,role}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    if(role=="Member"){
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    //update about
+    try{
+        await con.execute(`update kollege.Community set about=? where community_id=?`,[new_about,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community about updated successfully",{})
+    )
+} )
+
+const updateCommunityDescription=asyncHandler(async (req,res)=>{
+    const {comm_name,new_description}=req.body
+    const {username,role}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    if(role=="Member"){
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    //update description
+    try{
+        await con.execute(`update kollege.Community set description=? where community_id=?`,[new_description,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community description updated successfully",{})
+    )
+} )
+
+const updatePrivilege=asyncHandler(async (req,res)=>{
+    let rows,fields;
+    const {comm_name,updated_username,updated_role}=req.body
+    const {username,role}=req.user
+    let {user_id,community_id}=await getUserCommunityId(updated_username,comm_name)
+    if(username==updated_username){
+        throw new ApiError(401,"Cannot update own privilege")
+    }
+    if(role=="Member" || (role=="Moderator" && updated_role=="Admin")){
+        throw new ApiError(401,"User does not have the privilege to perform the operation")
+    }
+
+    //check if user being updated exists in the community or not
+    try{
+        [rows,fields]=await con.execute(`select user_id,role from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    if(rows.length<1){
+        throw new ApiError(401,"User is not member of given communiy or the user does not exists")
+    }
+    if(updated_role==rows[0].role){
+        throw new ApiError(401,"User is already on the updated role so cannot update it again")
+    }
+    //update privilege
+    try{
+        [rows,fields]=await con.execute(`update kollege.User_has_Community set role=? where user_id=? and community_id=?`,[updated_role,user_id,community_id])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User privileges updated successfully")
+    )
+} )
 
 //get
 const getCommuntiesProtected=asyncHandler( async(req,res)=>{
@@ -272,7 +511,7 @@ const getCommunityAbout=asyncHandler( async(req,res)=>{
     const {comm_name}=req.params
 
     try{
-    [rows,fields]=await con.execute(` select c.comm_name ,c.fullname  ,c.banner_url , c.type , c.description ,(select count(*) from kollege.User_has_Community b where b.community_id=c.community_id) as total_members ,u.username ,u.firstname ,u.lastname ,u.avatar_url from kollege.Community c inner join kollege.User u on c.owner=u.user_id where comm_name=?; `,[comm_name])
+    [rows,fields]=await con.execute(` select c.comm_name ,c.fullname  ,c.banner_url, c.about , c.type , c.description ,(select count(*) from kollege.User_has_Community b where b.community_id=c.community_id) as total_members ,u.username ,u.firstname ,u.lastname ,u.avatar_url from kollege.Community c inner join kollege.User u on c.owner=u.user_id where comm_name=?; `,[comm_name])
     }
     catch(err){
         throw new ApiError(401,err.message)
@@ -376,6 +615,68 @@ const getCommunityMembers=asyncHandler(async(req,res)=>{
     )
 })
 
+const getCommunityRoles=asyncHandler(async(req,res)=>{
+    let rows,fields;
+    const {comm_name}=req.params
+    const {username}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    try{
+        [rows,fields]=await con.execute(`select role from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
+        if(rows.length<1){
+            throw new Error("User is not member of given community")
+        }
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    let {role}=rows[0]
+    if(role=="Member"){
+        throw new ApiError(401,"User does not have acces to this route")
+    }
+    let query="";
+    if(role=="Moderator"){
+        query=`and uhc.role!="Admin"`
+    }
+    try{
+        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,uhc.role from kollege.User u inner join kollege.User_has_Community uhc on u.user_id =uhc.user_id inner join kollege.Community c on c.community_id=uhc.community_id where uhc.community_id=? and u.user_id!=c.owner and u.user_id!=? ${query}`,[community_id,user_id])
+    }
+    catch(err){
+        throw new ApiError(201,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community members fetched successfully",rows)
+    )
+})
+
+const getCommunityRequests=asyncHandler(async(req,res)=>{
+    let rows,fields;
+    const {comm_name}=req.params
+    const {username}=req.user
+    const {user_id,community_id}=await getUserCommunityId(username,comm_name)
+    try{
+        [rows,fields]=await con.execute(`select role from kollege.User_has_Community where user_id=? and community_id=?`,[user_id,community_id])
+        if(rows.length<1){
+            throw new Error("User is not member of given community")
+        }
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
+    let {role}=rows[0]
+    if(role=="Member"){
+        throw new ApiError(401,"User does not have acces to this route")
+    }
+    try{
+        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,u.avatar_url from kollege.User u inner join kollege.Community_Requests cr on u.user_id =cr.user_id where cr.community_id=?`,[community_id])
+    }
+    catch(err){
+        throw new ApiError(201,err.message)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community requests fetched successfully",rows)
+    )
+})
+
 export {
     createCommunity,
     getCommuntiesProtected,
@@ -386,7 +687,16 @@ export {
     getCommunityCardInfo,
     getCommunityAbout,
     userCommunityInfo,
+    getCommunityRoles,
     getCommunityMembers,
+    getCommunityRequests,
     joinCommunity,
-    cancelJoinRequest
+    leaveCommunity,
+    cancelJoinRequest,
+    acceptJoinRequest,
+    updatePrivilege,
+    updateCommunityName,
+    updateCommunityFullname,
+    updateCommunityAbout,
+    updateCommunityDescription
 }

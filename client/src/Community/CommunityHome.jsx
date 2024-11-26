@@ -1,66 +1,82 @@
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import PostModal from '../Post/PostModal';
-import CommunitySidebar from './CommunitySidebar';
 import PostCreationForm from '../Post/PostCreationForm';
+import axios from 'axios';
+import PostCard from '../Post/PostCard';
 
-const posts = [
-    {
-      id: 1,
-      author: "Dave Ebbelaar",
-      avatar: null,
-      time: "20d ago",
-      category: "Wins",
-      isPinned: false,
-      title: "Introducing: The GenAI Launchpad 🚀",
-      image: "https://g-p1v8sxx1jj4.vusercontent.net/placeholder.svg?height=100&width=200",
-      content: "After two years of building with GenAI, here's what I wish I'd had from day one... This has been a long time in the making, and I'm excited to finally pull back the curtain on",
-      likes: 94,
-      totalcomments: 74,
-      commenters: [
-        "https://via.placeholder.com/24",
-        "https://via.placeholder.com/24",
-        "https://via.placeholder.com/24",
-      ],
-      comments: [
-        {
-          id: 1,
-          author: "Jane Doe",
-          avatar: "https://via.placeholder.com/40",
-          content: "This is exactly what I've been looking for! Can't wait to get started.",
-          timestamp: "2 hours ago",
-          likes: 5
-        },
-        // More comments...
-      ],
-      lastComment: "1d ago"
-    },
-    {
-      id: 2,
-      author: "Dave Ebbelaar",
-      avatar: null,
-      time: "Jul '23",
-      category: "Announcements",
-      isPinned: false,
-      title: "Welcome to Data Alchemy - Start Here",
-      content: "Welcome to Data Alchemy! This is your starting point for mastering the fundamentals of working with data and AI. In this post, we'll cover the essentials you need to know to get started on your journey.",
-      likes: 150,
-      totalcomments: 42,
-      commenters: [
-        "https://via.placeholder.com/24",
-        "https://via.placeholder.com/24",
-      ],
-      lastComment: "2d ago"
-    }
-  ];
-  
 
 function CommunityHome() {
 
   const [selectedPost, setSelectedPost] = useState(null);
   const [isPostFormOpen, setIsPostFormOpen] = useState(false);
+  const [tags,setTags]=useState([])
+  let [posts,setPosts]=useState([])
+  const {comm_name}=useParams()
+
+  const handlePostCreation=(post)=>{
+    setPosts([post,...posts])
+  }
+
+  const handleTagFilter=(tag_name)=>{
+    axios.get(`http://localhost:8080/p/${comm_name}/?tag_name=${tag_name}`,{withCredentials:true})
+    .then( ({data})=>{
+      if(data.success){
+        setPosts(data?.data)
+      }
+      else{
+        throw new Error(data.message)
+      }
+    } )
+    .catch(err=>console.log(err.message))
+  }
+
+  const handleUpdate=(post_id,likes,comments)=>{
+    setPosts((prev)=>{
+      let newPosts=[...prev]
+      return newPosts.map( (post)=>{
+        if(post.post_id==post_id){
+          if(likes){
+            post.likes=likes
+          }
+          if(comments){
+            post.comments=comments
+          }
+        }
+        return post;
+      } )
+    })
+  }
+
+  useEffect(()=>{
+
+    //get tags
+    axios.get(`http://localhost:8080/t/${comm_name}`,{withCredentials: true})
+    .then( ({data})=>{
+      if(data.success){
+        setTags(data?.data)
+      }
+      else{
+        throw new Error(data.message)
+      }
+    } )
+    .catch(err=>console.log(err.message))
+
+    //get posts
+    axios.get(`http://localhost:8080/p/${comm_name}`,{withCredentials: true})
+    .then( ({data})=>{
+      if(data.success){
+        setPosts(data?.data)
+      }
+      else{
+        throw new Error(data.message)
+      }
+    } )
+    .catch(err=>console.log(err.message))
+
+  },[])
 
   return (
     <>
@@ -71,19 +87,19 @@ function CommunityHome() {
           post={selectedPost}
           isOpen={selectedPost}
           onClose={() => setSelectedPost(null)}
+          comm_name={comm_name}
+          handleUpdate={handleUpdate}
         />
       )}
 
       {/* Post Creation Form  */}
       {isPostFormOpen && (
-        <PostCreationForm
+        <PostCreationForm 
+        comm_name={comm_name}
+        tags={tags}
         isOpen={isPostFormOpen}
         onClose={() => setIsPostFormOpen(false)}
-        onSubmit={(postData) => {
-          // Handle the post submission here
-          console.log(postData);
-          setIsPostFormOpen(false);
-        }}
+        handlePostCreation={handlePostCreation}
         />
       )}
           {/* Main Content */}
@@ -107,66 +123,20 @@ function CommunityHome() {
               </p>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-2">
-              <button className="bg-slate-700 px-4 py-2 rounded-full text-slate">All</button>
-              <button className="bg-slate-800 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-700">General</button>
-              <button className="bg-slate-800 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-700">🏆 Wins</button>
-              <button className="bg-slate-800 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-700">💡 Help</button>
-              <button className="bg-slate-800 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-700">📚 Recommendations</button>
-              <button className="bg-slate-800 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-700">😊 Fun</button>
+            {/* Tag Filters */}
+            <div className="flex flex-wrap gap-4">
+            <button key={0} onClick={()=>handleTagFilter("All")} className="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-full text-slate-200 font-medium">All</button>
+              {tags.map( tag=>{
+                return <button key={tag.tag_id} onClick={()=>handleTagFilter(tag.tag_name)} className="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-full text-slate-200 font-medium">{tag.tag_name}</button>
+              } )}
             </div>
 
             {/* Posts */}
-            {posts.map(post => (
-              <div key={post.id} className="bg-slate-800 rounded-lg p-6 cursor-pointer" onClick={() => setSelectedPost(post)} >
-                {post.isPinned && (
-                  <div className="flex justify-between items-center mb-4 bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded">
-                    <span>📌 Pinned</span>
-                    <button className="text-sm">Hide</button>
-                  </div>
-                )}
-                <div className="flex items-start space-x-4">
-                  {(post.avatar)?<img src={post.avatar} alt={`${post.author}'s avatar`} className="rounded-full" />:
-                  <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{"T"}</div>}
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold">{post.author}</h3>
-                      <span className="text-slate-400 text-sm">{post.time}</span>
-                      <span className="text-slate-400">in</span>
-                      <span className="text-blue-400">{post.category}</span>
-                    </div>
-                    <h2 className="text-xl font-bold mt-2">{post.title}</h2>
-                    <p className="mt-2 text-slate-300">
-                      {post.content.length > 150 ? `${post.content.substring(0, 150)}...` : post.content}
-                    </p>
-                    {post.content.length > 150 && (
-                      <button className="text-blue-400 hover:text-blue-300 mt-2">Read more</button>
-                    )}
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center space-x-6">
-                        <button className="flex items-center space-x-2 text-slate-400 hover:text-slate">
-                          <span>👍</span>
-                          <span>{post.likes}</span>
-                        </button>
-                        <button className="flex items-center space-x-2 text-slate-400 hover:text-slate">
-                          <span>💬</span>
-                          <span>{post.totalcomments}</span>
-                        </button>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex -space-x-2">
-                          {post.commenters.map((commenter, index) => (
-                            <img key={index} src={commenter} alt="Commenter avatar" className="w-6 h-6 rounded-full border-2 border-slate-800" />
-                          ))}
-                        </div>
-                        <span className="text-slate-400 text-sm">Last comment {post.lastComment}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {
+              posts.map( post=>{
+                return <PostCard post={post} key={post.post_id} handleClick={() => setSelectedPost(post)} />
+              } )
+            }
           </div>
 
     </>

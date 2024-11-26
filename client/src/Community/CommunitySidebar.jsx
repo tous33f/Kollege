@@ -66,7 +66,6 @@ function CommunitySidebar() {
     .then( ({data})=>{
       if(data.success){
         setUserCommunityInfo(data.data)
-        console.log(data)
       }
     } )
     

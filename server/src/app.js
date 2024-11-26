@@ -25,8 +25,17 @@ app.use(cookieParser())
 
 import userRoutes from "./routes/user.routes.js"
 import communityRoutes from "./routes/community.routes.js"
+import postRoutes from "./routes/post.routes.js"
+import tagRoutes from "./routes/tag.routes.js"
+import likeRoutes from "./routes/like.routes.js"
+import commentRoutes from "./routes/comment.routes.js"
+import { verifyAuth } from "./middlewares/auth.middleware.js"
 
 app.use("/u",userRoutes)
-app.use("/c/",communityRoutes)
+app.use("/c",communityRoutes)
+app.use("/p",verifyAuth,postRoutes)
+app.use("/t",verifyAuth,tagRoutes)
+app.use("/l",verifyAuth,likeRoutes)
+app.use("/r",verifyAuth,commentRoutes)
 
 export {app}

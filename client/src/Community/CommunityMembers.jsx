@@ -30,7 +30,7 @@ function CommunityMembers() {
         <div className="w-full">
           <h2 className="text-2xl font-bold mb-6">Admins</h2>
             { admins.map( (admin,index)=>{
-                return  <div className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
+                return  <div key={admin.username} className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
                     <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{admin.firstname[0]}</div>
                     <div className='flex-col' >
                         <p className='text-slate-200 text-lg font-semibold' > {admin.firstname+" "+admin.lastname} </p>
@@ -43,8 +43,8 @@ function CommunityMembers() {
         <div className="w-full">
           <h2 className="text-2xl font-bold mb-6">Moderators</h2>
             { moderators.map( (moderator,index)=>{
-                return  <div className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
-                    <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{admin.firstname[0]}</div>
+                return  <div key={moderator.username} className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
+                    <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{moderator.firstname[0]}</div>
                     <div className='flex-col' >
                         <p className='text-slate-200 text-lg font-semibold' > {moderator.firstname+" "+moderator.lastname} </p>
                         <p className='' > @{moderator.username} </p>
@@ -56,8 +56,8 @@ function CommunityMembers() {
         <div className="w-full">
           <h2 className="text-2xl font-bold mb-6">Members</h2>
             { members.map( (member,index)=>{
-                return  <div className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
-                    <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{admin.firstname[0]}</div>
+                return  <div key={member.username} className='flex items-center justify-start space-x-4 cursor-pointer bg-slate-800 rounded-lg p-4 w-full mb-6' >
+                    <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{member.firstname[0]}</div>
                     <div className='flex-col' >
                         <p className='text-slate-200 text-lg font-semibold' > {member.firstname+" "+member.lastname} </p>
                         <p className='' > @{member.username} </p>

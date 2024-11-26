@@ -10,6 +10,8 @@ function Login() {
   let navigate=useNavigate()
   let path=useLocation().state?.path || "/"
   let user=useUserStore(state=>state.user)
+  let setUser=useUserStore(state=>state.setUser)
+  
   if(user?.username){
     navigate(path)
   }
@@ -33,7 +35,7 @@ function Login() {
       if(response.data.success){
         const {username,email}=response.data.data
         setUser( {username,email} )
-        navigate(path,{replace: true})
+        navigate(path)
       }
       else{
         throw Error(response.data.data.message)

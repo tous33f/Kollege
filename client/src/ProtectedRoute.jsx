@@ -7,8 +7,6 @@ function ProtectedRoute({children}) {
 
     let user=useUserStore(state=>state.user);
     const location=useLocation()
-
-    useEffect(()=>console.log(user),[user])
     
     return (
         user.username ? <>{children}</> : <Navigate to="/login" state={{path: location.pathname}} replace /> 

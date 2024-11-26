@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import Navbar from './Navbar/Navbar'
 import Home from './Pages/Home'
 import Footer from './Footer/Footer'
-import CommunityOverview from './Community/CommunityOverview'
 import CommunityHome from './Community/CommunityHome'
 import CommunityCreationForm from './Community/CommunityCreationForm'
 import CommunityMain from "./Community/CommunityMain"
@@ -10,7 +9,6 @@ import { Route, Routes } from 'react-router'
 import Signup from './User/Signup'
 import Login from './User/Login'
 import CommunityAbout from './Community/CommunityAbout'
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SearchCommunity from './Pages/SearchCommunity'
 import YourCommunities from './Pages/YourCommunities'
@@ -18,7 +16,10 @@ import ProtectedRoute from './ProtectedRoute'
 import axios from 'axios'
 import { useUserStore } from './store'
 import CommunityMembers from './Community/CommunityMembers'
-import CommunitySettings from './Community/CommunitySettings'
+import CommunitySettingsMain from './Community/CommunitySettings/CommunitySettingsMain'
+import CommunitySettingsDetails from './Community/CommunitySettings/CommunitySettingsDetails'
+import CommunitySettingsMembers from './Community/CommunitySettings/CommunitySettingsMembers'
+import CommunitySettingsRequests from './Community/CommunitySettings/CommunitySettingsRequests'
 
 
 function App() {
@@ -55,22 +56,14 @@ function App() {
           <Route path='members' element={<ProtectedRoute> <CommunityMembers /> </ProtectedRoute>} />
           <Route path='about' element={<CommunityAbout />} />
         </Route>
-        <Route path='c/:comm_name/settings' element={<CommunitySettings />} />
+        <Route path='c/:comm_name/settings' element={<ProtectedRoute> <CommunitySettingsMain /> </ProtectedRoute>}>
+          <Route path='' element={<CommunitySettingsDetails />} />
+          <Route path='members' element={<CommunitySettingsMembers />} />
+          <Route path='requests' element={<CommunitySettingsRequests />} />
+        </Route>
       </Routes>
 
       <Footer/>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        />
     </div>
   )
 }
