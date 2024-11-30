@@ -7,9 +7,14 @@ import PostCreationForm from '../Post/PostCreationForm';
 import axios from 'axios';
 import PostCard from '../Post/PostCard';
 import CommunitySidebar from './CommunitySidebar'
+import { useUserStore } from '../store';
 
 
 function CommunityHome() {
+
+  const avatar_url=useUserStore(state=>state.user.avatar_url)
+  const username=useUserStore(state=>state.user.username)
+  console.log(avatar_url)
 
   const [selectedPost, setSelectedPost] = useState(null);
   const [isPostFormOpen, setIsPostFormOpen] = useState(false);
@@ -126,8 +131,9 @@ function CommunityHome() {
             {/* Post Input */}
             <div onClick={() => setIsPostFormOpen(true)} className="cursor-pointer bg-slate-800 rounded-lg p-4">
               <div className="flex items-center space-x-4">
-              {(false)?<img src={"/"} a className="rounded-full" />:
-                  <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'  >{"T"}</div>}
+              {(avatar_url)?<img src={` http://localhost:8080/images/${avatar_url} `} alt={`${username}'s avatar`} className="w-10 h-10 rounded-full" />:
+                  <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{username[0]}</div>}
+                 
                 <div
                   placeholder="Write something"
                   className="bg-slate-700 text-slate-300 rounded-lg px-4 py-2 w-full "

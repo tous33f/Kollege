@@ -84,7 +84,7 @@ export default function EventCreationForm({ isOpen, onClose, onSubmit, tags, com
         className="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl"
       >
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-white">Create a New Post</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">Create a New Event</h2>
           
           {/* title  */}
           <div className="mb-4">
