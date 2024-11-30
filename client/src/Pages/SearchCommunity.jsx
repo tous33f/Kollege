@@ -8,6 +8,46 @@ function SearchCommunity() {
 
   let [communities,setCommunities]=useState([])
 
+  let [searchTerm, setSearchTerm] = useState('');
+  const filteredCommunities = communities.filter(community => 
+    community?.fullname.toLowerCase().includes(searchTerm.toLowerCase()) || community?.comm_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const handleSearch=(e)=>{
+    if(user.username){
+      route="get_communities_protected"
+    }
+    else{
+      route="get_communities_unprotected"
+    }
+    if(e.target.value==""){
+      setSearchTerm("")
+      axios.get(`http://localhost:8080/c/${route}?p=${curPage}`,{
+        withCredentials: true
+      })
+      .then( ({data})=>{
+        if(data.success){
+          setCommunities(data.data.communities)
+        }
+        else{
+          console.log("error")
+        }
+      } )
+      return
+    }
+    setSearchTerm(e.target.value)
+    axios.get(`http://localhost:8080/c/${route}?p=${-1}`,{
+      withCredentials: true
+    })
+    .then( ({data})=>{
+      if(data.success){
+        setCommunities(data.data.communities)
+      }
+      else{
+        console.log("error")
+      }
+    } )
+  }
+
   let [pageCount,setPageCount]=useState(0)
   
   let [curPage,setCurPage]=useState(1)
@@ -64,12 +104,12 @@ function SearchCommunity() {
         <h1 className="text-4xl font-bold mb-6">Discover Communities</h1>
         <p className="text-xl mb-8 max-w-2xl text-center">or <Link className='text-orange-400 font-bold' to="/create_community" >create your own</Link> </p>
         <div className='flex items-center bg-slate-800 mb-12 px-1 py-3 rounded-lg text-slate-300 w-2/5' >
-            <input type="text" className='outline-none bg-transparent px-3 w-full text-lg font-semibold' placeholder='Search for anything' />
+            <input type="text" className='outline-none bg-transparent px-3 w-full text-lg font-semibold' placeholder='Search for anything' value={searchTerm} onChange={(e)=>handleSearch(e)} />
         </div>
 
         <div className="w-full max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {communities.map((community, index) => (
+            {filteredCommunities.map((community, index) => (
               <CommunityCard key={community.comm_name} community={community} />
             ))}
           </div>

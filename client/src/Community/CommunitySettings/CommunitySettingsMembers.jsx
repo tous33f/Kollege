@@ -93,7 +93,7 @@ function CommunitySettingsMembers() {
             {filteredMembers.map((member,index) => (
             <li key={member.id} className="flex items-center justify-between bg-slate-800 p-4 rounded-md">
                 <div className="flex items-center space-x-4">
-                {member?.avatar_url ? <img src={member.avatar_url} alt={member?.firstname} className="w-10 h-10 rounded-full" />:               <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'>{member.username[0].toUpperCase()}</div>}
+                {member?.avatar_url ? <img src={ ` http://localhost:8080/images/${member?.avatar_url} ` } alt={member?.firstname} className="w-11 h-11 rounded-full" />:<div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'>{member.username[0].toUpperCase()}</div>}
                 <span>{member?.firstname+" "+member?.lastname}</span>
                 </div>
                 <div>

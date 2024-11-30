@@ -28,7 +28,7 @@ function CommunityNavbar() {
           <div className="flex space-x-8">
             <NavLink to="" end  className={({ isActive }) => (isActive ? active : notActive)} >Community</NavLink>
             <NavLink to="classroom"  className={({ isActive }) => (isActive ? active : notActive)} >Classroom</NavLink>
-            <NavLink to="calendar"  className={({ isActive }) => (isActive ? active : notActive)} >Calendar</NavLink>
+            <NavLink to="events"  className={({ isActive }) => (isActive ? active : notActive)} >Calendar</NavLink>
             <NavLink to="members"  className={({ isActive }) => (isActive ? active : notActive)} >Members</NavLink>
             <NavLink to="leaderboards"  className={({ isActive }) => (isActive ? active : notActive)} >Leaderboards</NavLink>
             <NavLink to="about" className={({ isActive }) => (isActive ? active : notActive)} >About</NavLink>

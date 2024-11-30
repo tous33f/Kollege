@@ -10,7 +10,7 @@ function PostCard({post,handleClick}) {
                   </div>
                 )}
                 <div className="flex items-start space-x-4">
-                  {(post.avatar_url)?<img src={post.avatar_url} alt={`${post.firstname}'s avatar`} className="rounded-full" />:
+                  {(post.avatar_url)?<img src={` http://localhost:8080/images/${post.avatar_url} `} alt={`${post.firstname}'s avatar`} className="w-10 h-10 rounded-full" />:
                   <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{post.firstname[0]}</div>}
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">

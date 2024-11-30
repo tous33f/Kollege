@@ -35,7 +35,7 @@ function Login() {
       if(response.data.success){
         const {username,email}=response.data.data
         setUser( {username,email} )
-        navigate(path)
+        navigate(path,{replace:true})
       }
       else{
         throw Error(response.data.data.message)

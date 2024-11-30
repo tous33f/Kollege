@@ -26,7 +26,7 @@ const getPost=asyncHandler(async(req,res)=>{
     }
     //get post from db
     try{
-        [rows,fields]=await con.execute(` select p.post_id,p.title,p.content,p.graphics_url,t.tag_name,u.username,u.firstname,u.lastname,u.avatar_url from kollege.Post p inner join kollege.Tag t on p.tag_id=t.tag_id inner join kollege.User u on p.user_id=u.user_id where p.post_id=? `,[post_id]);
+        [rows,fields]=await con.execute(` select p.post_id,p.title,p.content,p.graphics_url,p.created_on,t.tag_name,u.username,u.firstname,u.lastname,u.avatar_url from kollege.Post p inner join kollege.Tag t on p.tag_id=t.tag_id inner join kollege.User u on p.user_id=u.user_id where p.post_id=? `,[post_id]);
         if(rows.length<1){
             throw new ApiError(401,"Requested post does not exist");
         }
@@ -82,7 +82,7 @@ const getAllPosts=asyncHandler(async(req,res)=>{
 //post
 const createPost=asyncHandler(async(req,res)=>{
     let rows,fields
-    const {comm_name,tag_id,title,content,graphics_url}=req.body;
+    const {comm_name,tag_id,title,content}=req.body;
     const {username}=req.user;
     if(!comm_name || !tag_id || !title || !content){
         throw new ApiError(401,"Post information is incomplete");
@@ -110,10 +110,18 @@ const createPost=asyncHandler(async(req,res)=>{
         throw new ApiError(401,err.message);
     }
     }
+    //get post image
+    let graphics_url=req?.file?.filename
     //create post
     try{
-        [rows,fields]=await con.execute(` insert into kollege.Post(user_id,community_id,tag_id,title,content) values(?,?,?,?,?) `,[user_id,community_id,tag_id,title,content]);
-        [rows,fields]=await con.execute(` select * from kollege.Post where post_id=? `,[rows.insertId])
+        if(graphics_url){
+            [rows,fields]=await con.execute(` insert into kollege.Post(user_id,community_id,tag_id,title,content,graphics_url) values(?,?,?,?,?,?) `,[user_id,community_id,tag_id,title,content,graphics_url]);
+            [rows,fields]=await con.execute(` select * from kollege.Post where post_id=? `,[rows.insertId])
+        }
+        else{
+            [rows,fields]=await con.execute(` insert into kollege.Post(user_id,community_id,tag_id,title,content) values(?,?,?,?,?) `,[user_id,community_id,tag_id,title,content]);
+            [rows,fields]=await con.execute(` select * from kollege.Post where post_id=? `,[rows.insertId])
+        }
     }
     catch(err){
         throw new ApiError(401,err.message);

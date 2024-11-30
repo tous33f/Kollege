@@ -6,6 +6,7 @@ import PostModal from '../Post/PostModal';
 import PostCreationForm from '../Post/PostCreationForm';
 import axios from 'axios';
 import PostCard from '../Post/PostCard';
+import CommunitySidebar from './CommunitySidebar'
 
 
 function CommunityHome() {
@@ -14,6 +15,7 @@ function CommunityHome() {
   const [isPostFormOpen, setIsPostFormOpen] = useState(false);
   const [tags,setTags]=useState([])
   let [posts,setPosts]=useState([])
+  let [event,setEvent]=useState(null)
   const {comm_name}=useParams()
 
   const handlePostCreation=(post)=>{
@@ -76,9 +78,26 @@ function CommunityHome() {
     } )
     .catch(err=>console.log(err.message))
 
+    //get event
+    axios.get(`http://localhost:8080/e/${comm_name}`,{withCredentials: true})
+    .then( ({data})=>{
+      if(data.success){
+        setEvent(data?.data[0])
+      }
+      else{
+        throw new Error(data.message)
+      }
+    } )
+    .catch(({response})=>{
+      console.log(response?.message)
+    })
+
   },[])
 
   return (
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <>
 
       {/* Post Model  */}
@@ -117,11 +136,11 @@ function CommunityHome() {
             </div>
 
             {/* Upcoming Event */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
+            {event && <div className="bg-slate-800/50 rounded-lg p-4">
               <p className="text-center">
-                📅 Data Freelancer Q&A Call is happening in 5 hours
+                📅 {event?.title} is happening in { Math.floor(((new Date(event?.start)).getTime() - (new Date()).getTime())/3600000)  } hours
               </p>
-            </div>
+            </div>}
 
             {/* Tag Filters */}
             <div className="flex flex-wrap gap-4">
@@ -140,6 +159,10 @@ function CommunityHome() {
           </div>
 
     </>
+    <CommunitySidebar />
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -1,13 +1,12 @@
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
-import { ToastContainer,toast } from 'react-toastify';
-
 export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm_name, handlePostCreation }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   let [tagId,setTagId]=useState(tags[0].tag_id)
   let [tagName,setTagName]=useState(tags[0].tag_name)
   const [image, setImage] = useState(null);
+  let [clear,setClear]=useState(false)
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -29,13 +28,6 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
     };
   }, [isOpen, onClose]);
 
-  const handleTitleChange = (e) => {
-    const words = e.target.value.trim().split(/\s+/);
-    if (words.length <= 20) {
-      setTitle(e.target.value);
-    }
-  };
-
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setImage(e.target.files[0]);
@@ -45,12 +37,15 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
   const handleSubmit = (e) => {
     e.preventDefault();
     if(!title.trim() || !content.trim()){
-      toast.error("Information is incomplete")
       return
     }
-    axios.post(`http://localhost:8080/p/create`,{
-      comm_name,tag_id:tagId,title,content
-    },{withCredentials: true})
+    let form=new FormData()
+    form.append("title",title)
+    form.append("content",content)
+    form.append("tag_id",tagId)
+    form.append("graphics_url",image)
+    form.append("comm_name",comm_name)
+    axios.post(`http://localhost:8080/p/create`,form,{withCredentials: true})
     .then( ({data})=>{
       if(data.success){
         axios.get(`http://localhost:8080/p/${comm_name}/${data?.data?.post_id}`,{withCredentials: true})
@@ -63,8 +58,9 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
             throw new Error(data.message)
           }
         } )
-        .catch( (err)=>{
-          console.log(err.message)
+        .catch( ({response})=>{
+          console.log(response)
+          console.log(response?.data?.message)
           onClose()
         } )
       }
@@ -72,8 +68,8 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
         throw new Error(data.message)
       }
     } )
-    .catch(err=>{
-      console.log(err.message)
+    .catch(({response})=>{
+      console.log(response?.data?.message)
       onClose()
     })
   };
@@ -150,6 +146,7 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
               id="image"
               accept="image/*"
               onChange={handleImageChange}
+              key={clear}
               ref={fileInputRef}
               className="hidden"
             />
@@ -164,6 +161,10 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
               <span className="ml-3 text-sm text-gray-400">
                 {image ? image.name : 'No file chosen'}
               </span>
+              { image && <svg onClick={()=>{
+                setClear(prev=>!prev)
+                setImage(null)
+              }} className='ml-3 cursor-pointer' fill="#4b5563" height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 490 490" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <polygon points="456.851,0 245,212.564 33.149,0 0.708,32.337 212.669,245.004 0.708,457.678 33.149,490 245,277.443 456.851,490 489.292,457.678 277.331,245.004 489.292,32.337 "></polygon> </g></svg>}
             </div>
           </div>
 
@@ -184,18 +185,6 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
           </div>
         </div>
       </div>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        />
     </div>
   );
 }

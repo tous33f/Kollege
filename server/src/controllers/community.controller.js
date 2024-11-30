@@ -21,9 +21,17 @@ const createCommunity=asyncHandler( async(req,res)=>{
         throw new ApiError(401,"Community name already exists.")
     }
 
+    let banner_url=req?.file?.filename
+
     try{
-        await con.execute( `insert into kollege.Community(comm_name,fullname,about,description,type,owner) values(?,?,?,?,?,?);` , [comm_name,fullname,about,description,type,user_id] );
-        [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[comm_name])
+        if(banner_url){
+            await con.execute( `insert into kollege.Community(comm_name,fullname,about,description,type,owner,banner_url) values(?,?,?,?,?,?,?);` , [comm_name,fullname,about,description,type,user_id,banner_url] );
+            [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[comm_name])
+        }
+        else{
+            await con.execute( `insert into kollege.Community(comm_name,fullname,about,description,type,owner) values(?,?,?,?,?,?);` , [comm_name,fullname,about,description,type,user_id] );
+            [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[comm_name])
+        }
         const {community_id}=rows[0];
         await con.execute(`insert into kollege.User_has_Community (user_id,community_id,role) values(?,?,"Admin")`,[user_id,community_id])
     }
@@ -406,7 +414,7 @@ const getCommuntiesProtected=asyncHandler( async(req,res)=>{
         new ApiResponse(201,"Communities fetched successfully",{
             "page": page,
             "pageCount": pageCount,
-            "communities": rows.slice(page * 6 - 6, page * 6)
+            "communities": (page<1)?rows:rows.slice(page * 6 - 6, page * 6)
         })
     );
 } )
@@ -427,7 +435,7 @@ const getCommuntiesUnProtected=asyncHandler( async(req,res)=>{
         new ApiResponse(201,"Communities fetched successfully",{
             "page": page,
             "pageCount": pageCount,
-            "communities": rows.slice(page * 6 - 6, page * 6)
+            "communities": (page<1)?rows:rows.slice(page * 6 - 6, page * 6)
         })
     );
 } )
@@ -638,7 +646,7 @@ const getCommunityRoles=asyncHandler(async(req,res)=>{
         query=`and uhc.role!="Admin"`
     }
     try{
-        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,uhc.role from kollege.User u inner join kollege.User_has_Community uhc on u.user_id =uhc.user_id inner join kollege.Community c on c.community_id=uhc.community_id where uhc.community_id=? and u.user_id!=c.owner and u.user_id!=? ${query}`,[community_id,user_id])
+        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,u.avatar_url,uhc.role from kollege.User u inner join kollege.User_has_Community uhc on u.user_id =uhc.user_id inner join kollege.Community c on c.community_id=uhc.community_id where uhc.community_id=? and u.user_id!=c.owner and u.user_id!=? ${query}`,[community_id,user_id])
     }
     catch(err){
         throw new ApiError(201,err.message)

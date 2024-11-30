@@ -74,7 +74,7 @@ function CommunitySidebar() {
   return (
     <div className="space-y-6">
             <div className="bg-gray-800 rounded-lg overflow-hidden">
-              <img src={community.banner_url?community.banner_url: "https://via.placeholder.com/400x200"} alt="Community banner" className="w-full h-32 object-cover" />
+              <img src={community?.banner_url? `http://localhost:8080/images/${community?.banner_url}` : "https://via.placeholder.com/400x200"} alt="Community banner" className="w-full h-32 object-cover" />
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-2">{community.fullname}</h2>
                 <p className="text-gray-400 mb-4">{community.about}</p>

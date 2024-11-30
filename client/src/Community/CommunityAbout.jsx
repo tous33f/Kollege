@@ -2,6 +2,7 @@ import React from 'react';
 import { useState,useEffect } from 'react';
 import { useParams } from 'react-router';
 import axios from 'axios';
+import CommunitySidebar from './CommunitySidebar'
 
 export default function CommunityAbout() {
 
@@ -18,18 +19,32 @@ export default function CommunityAbout() {
   },[])
 
   return (
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+
           <div className="lg:col-span-2 space-y-6">
             <h1 className="text-2xl font-bold">{community?.fullname}</h1>
             
             {/* Main Banner */}
             <div className="bg-[#0a0b34] rounded-lg overflow-hidden ">
+              { community?.banner_url ?
               <img
+                src={` http://localhost:8080/images/${community?.banner_url} `} 
+                alt={`${community?.fullname} banner`} 
+                width={400} 
+                height={800} 
+                className="w-full h-64 object-cover"
+                /> :
+                <img
                 src="https://g-p1v8sxx1jj4.vusercontent.net/placeholder.svg" 
                 alt={`${community.fullname} banner`} 
                 width={400} 
                 height={800} 
                 className="w-full h-64 object-cover"
                 />
+              }
             </div>
 
             {/* Community Info */}
@@ -54,11 +69,18 @@ export default function CommunityAbout() {
                 <span>Free</span>
               </div> */}
               <div className="flex items-center space-x-2">
+                { community?.avatar_url ?
                 <img 
-                  src={community?.banner_url?community?.banner_url:"https://via.placeholder.com/32" }
+                src={ ` http://localhost:8080/images/${community?.avatar_url} ` }
+                alt="Creator avatar" 
+                className="w-8 h-8 rounded-full"
+                />:
+                <img 
+                  src={"https://via.placeholder.com/32" }
                   alt="Creator avatar" 
                   className="w-8 h-8 rounded-full"
                 />
+                }
                 <span>By {community?.firstname+" "+community?.lastname}</span>
               </div>
             </div>
@@ -70,5 +92,10 @@ export default function CommunityAbout() {
               </p>
             </div>
           </div>
+
+        <CommunitySidebar />
+      </div>
+    </div>
+  </div>
   );
 }

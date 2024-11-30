@@ -4,19 +4,57 @@ import { useNavigate } from 'react-router';
 
 export default function CommunityCreationForm() {
   let [isPublic, setIsPublic] = useState(true);
+  let [banner_url,setBanner_url]=useState(null)
   let [comm_name, setComm_name] = useState('');
   let [fullname, setFullname] = useState('');
   let [about, setAbout] = useState('');
   let [description, setDescription] = useState('');
   let [tags,setTags]=useState([])
   let [tag,setTag]=useState('')
+  let [error,setError]=useState('')
   let navigate=useNavigate()
 
   const handleSubmit=async ()=>{
+
+    let form=new FormData()
+
+    if(!comm_name){
+      setError("Please enter a community name for identification")
+      return
+    }
+    form.append("comm_name",comm_name)
+    if(!fullname){
+      setError("Please enter a community name for display")
+      return
+    }
+    form.append("fullname",fullname)
+    if(!about || about.trim().split(" ").length>30){
+      setError("About section is not given or length is invalid")
+      return
+    }
+    form.append("about",about)
+    if(!description || description.trim().split(" ").length>300){
+      setError("Description section is not given or length is invalid")
+      return
+    }
+    form.append("description",description)
+    if(tags.length<1){
+      setError("Please add atleast one tag")
+      return
+    }
+    form.append("tags",tags)
+    if(isPublic){
+      form.append("type","Public")
+    }
+    else{
+      form.append("type","Private")
+    }
+    if(banner_url){
+      form.append("banner_url",banner_url)
+    }
+
     try{
-      const {data}=await axios.post(`http://localhost:8080/c/create`,{
-        comm_name,fullname,about,description,type:(isPublic?"Public":"Private")
-      },{withCredentials: true})
+      const {data}=await axios.post(`http://localhost:8080/c/create`,form,{withCredentials: true})
       if(!data.success){
         throw new Error(data.message)
       }
@@ -36,8 +74,8 @@ export default function CommunityCreationForm() {
         throw new Error(data.message)
       }
     }
-    catch(err){
-      console.log(err.message)
+    catch({response}){
+      console.log(response?.data?.message)
     }
   }
 
@@ -135,7 +173,7 @@ export default function CommunityCreationForm() {
 
           <div>
             <label htmlFor="communityName" className="block text-sm font-medium text-slate-300 mb-2">
-              Community Tags
+              Community Tags <span className='mx-2'>·</span> <span className='text-red-500'>Cannot modify after community creation</span>
             </label>
             <div>
               <input
@@ -171,23 +209,19 @@ export default function CommunityCreationForm() {
             <label htmlFor="bannerImage" className="block text-sm font-medium text-slate-300 mb-2">
               Community Banner Image
             </label>
-            <input
-              type="file"
-              id="bannerImage"
-              name="bannerImage"
-              accept="image/*"
-              className="hidden"
-              onChange={() => console.log('File selected')}
-            />
             <div className="mt-1 flex items-center">
                 <input 
                 className="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                id="profile-picture" 
+                id="banner_url"
                 type="file" 
                 accept="image/*"
+                name='banner_url'
+                onChange={(e) => setBanner_url(e.target.files[0])}
                 />
             </div>
           </div>
+
+          <p className='text-center text-red-500 text-lg font-medium' >{error}</p>
 
           <div>
             <button onClick={handleSubmit}

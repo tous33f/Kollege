@@ -6,9 +6,9 @@ import { con } from "../index.js"
 import { getUserCommunityId } from "../utils/UserCommunityId.js"
 
 //get
-const getComments=asyncHandler(async(req,res)=>{
+const getReplies=asyncHandler(async(req,res)=>{
     let rows,fields;
-    const {comm_name,post_id}=req.params;
+    const {comm_name,comment_id}=req.params;
     const {username}=req.user;
     let {user_id,community_id}=await getUserCommunityId(username,comm_name)
     //check if user is member of community
@@ -21,32 +21,32 @@ const getComments=asyncHandler(async(req,res)=>{
     if(rows.length<1){
         throw new ApiError(401,"User is not member of given communiy so cannot get likes")
     }
-    //check if post exists
+    //check if comment exists
     try{
-        [rows,fields]=await con.execute(` select post_id from kollege.Post where post_id=? `,[post_id]);
+        [rows,fields]=await con.execute(` select comment_id from kollege.Comment where comment_id=? `,[comment_id]);
         if(rows.length<1){
-            throw new ApiError(401,"Given post does not exist");
+            throw new ApiError(401,"Given comment does not exist");
         }
     }
     catch(err){
         throw new ApiError(401,err.message);
     }
-    //get comments
+    //get replies
     try{
-        [rows,fields]=await con.execute(` select c.comment_id,c.comment,c.commented_on,u.username,u.firstname,u.lastname,u.avatar_url,(select count(*) from kollege.Comment_Like cl where cl.comment_id=c.comment_id ) as likes,(select count(*)>0 from kollege.Comment_Like cl where cl.comment_id=c.comment_id and cl.user_id=?) as has_liked from kollege.Comment c inner join kollege.User u on c.user_id=u.user_id where c.post_id=? order by c.commented_on desc `,[user_id,post_id])
+        [rows,fields]=await con.execute(` select c.reply_id,c.comment,c.commented_on,u.username,u.firstname,u.lastname,u.avatar_url,(select count(*) from kollege.Comment_Like cl where cl.comment_id=c.comment_id ) as likes,(select count(*)>0 from kollege.Comment_Like cl where cl.comment_id=c.comment_id and cl.user_id=?) as has_liked from kollege.Reply c inner join kollege.User u on c.user_id=u.user_id where c.comment_id=? order by c.commented_on desc `,[user_id,comment_id])
     }
     catch(err){
         throw new ApiError(401,err.message)
     }
     res.status(201).json(
-        new ApiResponse(201,"Comments fetched successfully",rows)
+        new ApiResponse(201,"Replies fetched successfully",rows)
     )
 })
 
 //post
-const comment=asyncHandler(async(req,res)=>{
+const reply=asyncHandler(async(req,res)=>{
     let rows,fields;
-    const {comm_name,post_id,comment}=req.body;
+    const {comm_name,comment_id,comment}=req.body;
     const {username}=req.user;
     let {user_id,community_id}=await getUserCommunityId(username,comm_name)
     //check if user is member of community
@@ -59,11 +59,11 @@ const comment=asyncHandler(async(req,res)=>{
     if(rows.length<1){
         throw new ApiError(401,"User is not member of given communiy so cannot like")
     }
-    //check if post exists
+    //check if comment exists
     try{
-        [rows,fields]=await con.execute(` select post_id from kollege.Post where post_id=? `,[post_id]);
+        [rows,fields]=await con.execute(` select comment_id from kollege.Comment where comment_id=? `,[comment_id]);
         if(rows.length<1){
-            throw new ApiError(401,"Given post does not exist");
+            throw new ApiError(401,"Given comment does not exist");
         }
     }
     catch(err){
@@ -71,20 +71,20 @@ const comment=asyncHandler(async(req,res)=>{
     }
     //comment on post
     try{
-        [rows,fields]=await con.execute(` insert into kollege.Comment(user_id,post_id,comment) values(?,?,?) `,[ user_id,post_id,comment]);
-        [rows,fields]=await con.execute(` select c.comment_id,c.comment,c.commented_on,u.username,u.firstname,u.lastname,u.avatar_url,(select 0) as likes from kollege.Comment c inner join kollege.User u on c.user_id=u.user_id where c.comment_id=? `,[rows.insertId])
+        [rows,fields]=await con.execute(` insert into kollege.Reply(user_id,comment_id,comment) values(?,?,?) `,[ user_id,comment_id,comment]);
+        [rows,fields]=await con.execute(` select c.reply_id,c.comment,c.commented_on,u.username,u.firstname,u.lastname,u.avatar_url,(select 0) as likes from kollege.Reply c inner join kollege.User u on c.user_id=u.user_id where c.reply_id=? `,[rows.insertId])
     }
     catch(err){
         throw new ApiError(401,err.message);
     }
     res.status(201).json(
-        new ApiResponse(201,"Comment posted successfully",rows[0])
+        new ApiResponse(201,"Reply posted successfully",rows[0])
     )
 })
 
-const remove_comment=asyncHandler(async(req,res)=>{
+const remove_reply=asyncHandler(async(req,res)=>{
     let rows,fields;
-    const {comm_name,post_id,comment_id}=req.body;
+    const {comm_name,reply_id}=req.body;
     const {username}=req.user;
     let {user_id,community_id}=await getUserCommunityId(username,comm_name)
     //check if user is member of community
@@ -97,19 +97,9 @@ const remove_comment=asyncHandler(async(req,res)=>{
     if(rows.length<1){
         throw new ApiError(401,"User is not member of given communiy so cannot like")
     }
-    //check if post exists
+    //check if user has already replied on the comment
     try{
-        [rows,fields]=await con.execute(` select post_id from kollege.Post where post_id=? `,[post_id]);
-        if(rows.length<1){
-            throw new ApiError(401,"Given post does not exist");
-        }
-    }
-    catch(err){
-        throw new ApiError(401,err.message);
-    }
-    //check if user has already commented on the post
-    try{
-        [rows,fields]=await con.execute(` select user_id,comment_id from kollege.Comment where comment_id=? `,[comment_id]);
+        [rows,fields]=await con.execute(` select user_id,reply_id from kollege.Reply where reply_id=? `,[reply_id]);
         if(rows.length<1){
             throw new ApiError(401,"User has not commented the given comment");
         }
@@ -122,7 +112,7 @@ const remove_comment=asyncHandler(async(req,res)=>{
     }
     //remove post comment
     try{
-        await con.execute(` delete from kollege.Comment where comment_id=? `,[ comment_id]);
+        await con.execute(` delete from kollege.Reply where reply_id=? `,[reply_id]);
     }
     catch(err){
         throw new ApiError(401,err.message);
@@ -133,7 +123,7 @@ const remove_comment=asyncHandler(async(req,res)=>{
 })
 
 export {
-    getComments,
-    comment,
-    remove_comment
+    getReplies,
+    reply,
+    remove_reply
 }

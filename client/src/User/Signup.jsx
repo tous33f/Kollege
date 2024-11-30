@@ -1,14 +1,14 @@
 import axios from 'axios';
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router';
-import { ToastContainer, toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
+import { toast,ToastContainer,Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Signup() {
 
-    const naviage=useNavigate()
+  let [error,setError]=useState('')
 
-    const [form,setForm]=useState({
+    let [form,setForm]=useState({
         username: "",
         firstname: "",
         lastname: "",
@@ -17,8 +17,13 @@ function Signup() {
         avatar: null
     })
 
+    let [clear,setClear]=useState(false)
+
     const handleChange=(e)=>{
-      const { name, value } = e.target;
+      let { name, value } = e.target;
+      if(name=="avatar"){
+        value=e.target.files[0]
+      }
       setForm(prevState => ({
       ...prevState,
       [name]: value
@@ -26,24 +31,69 @@ function Signup() {
     }
 
     const handleSubmit=(e)=>{
-        axios.post("http://localhost:8080/u/register",form)
-        .then((response)=>{
-            if(response.data.success){
-                toast.success("Registered successfully.Please login.")
-                setForm( ()=>({
-                  username: "",
-                  firstname: "",
-                  lastname: "",
-                  email: "",
-                  password: "",
-                  avatar: null
-                }) )
-            }
-            else{
-              throw Error(response.data.message)
-            }
-        })
-        .catch( (err)=> toast.error(`Error: ${err.message}`))
+
+      let newForm=new FormData()
+
+      if(!form.username){
+        setError("Please add a username")
+        return
+      }
+      newForm.append("username",form.username)
+      if(!form.firstname){
+        setError("Please add a firstname")
+        return
+      }
+      newForm.append("firstname",form.firstname)
+      if(!form.lastname){
+        setError("Please add a lastname")
+        return
+      }
+      newForm.append("lastname",form.lastname)
+      if(!form.email){
+        setError("Please add an email")
+        return
+      }
+      newForm.append("email",form.email)
+      if(!form.password){
+        setError("Please add a password")
+        return
+      }
+      newForm.append("password",form.password)
+      if(form?.avatar){
+        newForm.append("avatar",form.avatar)
+      }
+
+      axios.post("http://localhost:8080/u/register",newForm)
+      .then((response)=>{
+          if(response.data.success){
+              setForm( ()=>({
+                username: "",
+                firstname: "",
+                lastname: "",
+                email: "",
+                password: "",
+                avatar: null
+              }) )
+              setClear(prev=>!prev)
+              toast.success("Account created successfully.Please Login with your new credentials.")
+          }
+          else{
+            throw Error(response.data.message)
+          }
+      })
+      .catch( ({response})=> {
+        console.log(response?.data?.message)
+        toast.error(response?.data?.message)
+        setForm( ()=>({
+          username: "",
+          firstname: "",
+          lastname: "",
+          email: "",
+          password: "",
+          avatar: null
+        }) )
+        setClear(prev=>!prev)
+      })
     }
 
   return (
@@ -134,10 +184,16 @@ function Signup() {
               <input 
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-300 leading-tight focus:outline-none focus:shadow-outline" 
                 id="profile-picture" 
+                key={clear}
                 type="file" 
+                onChange={handleChange}
+                name="avatar"
                 accept="image/*"
               />
             </div>
+
+            <p className='text-center text-red-500 text-lg font-medium mb-6' >{error}</p>
+
             <div className="flex items-center justify-between">
               <button 
                 className="font-semibold text-slate-200 bg-slate-900 hover:bg-slate-950 hover:text-slate-200 rounded-lg transition hover:cursor-pointer py-2 px-4 focus:outline-none focus:shadow-outline" 
@@ -146,17 +202,19 @@ function Signup() {
               >
                 Sign Up
               </button>
-              <a className="inline-block align-baseline font-bold text-sm text-slate-300 hover:text-slate-400" href="#">
+              <Link to="/login" className="inline-block align-baseline font-bold text-sm text-slate-300 hover:text-slate-400" href="#">
                 Already have an account?
-              </a>
+              </Link>
             </div>
           </form>
 
         </div>
+
         <ToastContainer
         position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
+        containerId={"signup"}
+        autoClose={1500}
+        hideProgressBar
         newestOnTop={false}
         closeOnClick
         rtl={false}
@@ -164,7 +222,9 @@ function Signup() {
         draggable
         pauseOnHover
         theme="dark"
+        transition={Bounce}
         />
+
       </main>
     </>
   )

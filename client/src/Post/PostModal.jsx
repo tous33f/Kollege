@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Comment from './Comment'; 
 
 export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate }) {
-
+  
   const modalRef=useRef(null)
   const commentRef=useRef(null)
 
@@ -11,6 +11,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
   let [hasLiked,setHasLiked]=useState(false);
   let [comments,setComments]=useState([])
   let [commentInput,setCommentInput]=useState("")
+  let [replyName,setReplyName]=useState("")
+  let [replyId,setReplyId]=useState(null)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -118,6 +120,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
       .then( ({data})=>{
         if(data.success){
           setCommentInput("")
+          console.log(data?.data)
           setComments(prev=>{
             handleUpdate(post.post_id,null,comments.length+1)
             return [data?.data,...prev]
@@ -158,6 +161,26 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
       })
   }
 
+  const handleReplySubmit=()=>{
+    axios.post(`http://localhost:8080/rc/reply`,{
+      comm_name,comment_id:replyId,comment:commentInput
+    },{withCredentials:true})
+    .then( ({data})=>{
+      if(data.success){
+        setCommentInput("")
+        setReplyName("")
+        setReplyId(null)
+      }
+      else{
+        throw new Error(data.message)
+      }
+    } )
+    .catch(({response})=>{
+      console.log(response?.data?.message)
+    })
+  }
+
+  
   if (!isOpen) return null;
 
   return (
@@ -168,8 +191,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
         {/* Header */}
         <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-start">
           <div className="flex items-center space-x-4">
-            {post.avatar_url?<img 
-              src={post.avatar_ur} 
+            {post?.avatar_url?<img 
+              src={` http://localhost:8080/images/${post.avatar_url} `} 
               alt={`${post.firstname}'s avatar`}
               className="w-10 h-10 rounded-full"
             />:
@@ -177,7 +200,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="font-semibold">{post.firstname + " " + post.lastname}</h3>
-                <span className="text-gray-400 text-sm">{ (new Date(post.created_on)).toDateString() }</span>
+                <span className="text-gray-400 text-sm">{ new Date(post.created_on).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }</span>
                 <span className="text-gray-400">in</span>
                 <span className="text-blue-400">{post.tag_name}</span>
               </div>
@@ -201,7 +224,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
           {post.graphics_url && (
             <div className="mt-4">
               <img
-                src={post.image} 
+                src={` http://localhost:8080/images/${post.graphics_url} `} 
                 alt="Post attachment" 
                 className="rounded-lg max-h-[400px] w-full object-cover"
               />
@@ -234,19 +257,26 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
               comment={comment}
               comm_name={comm_name}
               handleCommentDelete={handleCommentDelete}
-              setComments={setComments} />
+              setComments={setComments}
+              handleReplyButton={()=>{
+                setReplyId(comment.comment_id)
+                setReplyName(comment?.firstname+" "+comment?.lastname)
+              }} />
             ))}
           </div>
         </div>
 
         {/* Comment Input */}
         <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-4">
-        {/* {replyingToComment && ( */}
+        {replyId && (
             <div className="flex justify-between items-center mb-2 bg-gray-700 p-2 rounded-md">
               <span className="text-sm text-gray-300">
-                Replying to Ali
+                Replying to {replyName}
               </span>
-              <button
+              <button onClick={()=>{
+                setReplyName("")
+                setReplyId(null)
+              }}
                 className="text-gray-400 hover:text-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,7 +284,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
                 </svg>
               </button>
             </div>
-          {/* )} */}
+          )}
           <div className="flex space-x-2">
             <input ref={commentRef}
               type="text"
@@ -264,7 +294,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
               className="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={handleCommentSubmit}
+              onClick={replyId?handleReplySubmit:handleCommentSubmit}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Post

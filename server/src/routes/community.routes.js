@@ -2,11 +2,12 @@ import { Router } from "express";
 import { verifyAuth } from "../middlewares/auth.middleware.js";
 import { acceptJoinRequest, cancelJoinRequest, createCommunity, getCommunityAbout, getCommunityCardInfo, getCommunityMembers, getCommunityRequests, getCommunityRoles, getCommuntiesProtected, getCommuntiesUnProtected, getCreatedCommunities, getJoinedCommunities, getRequestedCommunities, joinCommunity, leaveCommunity, updateCommunityAbout, updateCommunityDescription, updateCommunityFullname, updateCommunityName, updatePrivilege, userCommunityInfo } from "../controllers/community.controller.js";
 import { user_role } from "../middlewares/user_role.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router=Router()
 
 //post
-router.route("/create").post(verifyAuth,createCommunity)
+router.route("/create").post(verifyAuth,upload.single("banner_url"),createCommunity)
 router.route("/join_community").post(verifyAuth,joinCommunity)
 router.route("/leave_community").post(verifyAuth,user_role,leaveCommunity)
 router.route("/cancel_join_request").post(verifyAuth,cancelJoinRequest)

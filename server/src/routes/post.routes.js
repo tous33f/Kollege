@@ -2,11 +2,12 @@
 import { Router } from "express";
 import { createPost, deletePost, getAllPosts, getPost, updateContent, updateTag, updateTitle } from "../controllers/post.controller.js";
 import { user_role } from "../middlewares/user_role.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 let router=Router()
 
 //post
-router.route("/create").post(createPost)
+router.route("/create").post(upload.single("graphics_url"),createPost)
 router.route("/delete").post(user_role,deletePost)
 router.route("/update_title").post(updateTitle)
 router.route("/update_content").post(updateContent)

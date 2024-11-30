@@ -6,7 +6,7 @@ import {ApiError} from "../utils/ApiError.js"
 import { generateAccessToken,generateRefreshToken } from "../utils/TokenGeneration.js"
 
 const registerUser=asyncHandler( async(req,res)=>{
-
+    // console.log(req.body,req.file,req?.files)
     let rows,fields
 
     //check if all fields are given
@@ -31,19 +31,14 @@ const registerUser=asyncHandler( async(req,res)=>{
         throw new ApiError(402,err_messsage)
     }
 
-    //check for avatar and coverImage
-    // let avatar=req.files?.avatar
-    // let coverImage=req.files?.coverImage
-    // if(!avatar){
-    //     throw new ApiError(403,"Avatar is required")
-    // }
-    // avatar=await fileUploader(avatar[0].path)
-    // if(coverImage && Array.isArray(coverImage) && coverImage.length>0){
-    //     coverImage=await fileUploader(coverImage[0].path)
-    // }
-
-    //create user
-    await con.execute(`insert into User(username,firstname,lastname,email,password) values(?,?,?,?,?);`,[username,firstname,lastname,email,password]);
+    // check for avatar and coverImage
+    let avatar=req?.file?.filename
+    if(avatar){
+        await con.execute(`insert into User(username,firstname,lastname,email,password,avatar_url) values(?,?,?,?,?,?);`,[username,firstname,lastname,email,password,avatar]);        
+    }
+    else{
+        await con.execute(`insert into User(username,firstname,lastname,email,password) values(?,?,?,?,?);`,[username,firstname,lastname,email,password]);
+    }
 
     //validate if its created and remove password and refreshToken from response
     [rows,fields]=await con.execute(`select username,firstname,lastname,email from kollege.User where username=?`,[username]);
@@ -152,4 +147,107 @@ const getUser=asyncHandler( async(req,res)=>{
     )
 } )
 
-export {registerUser,loginUser,logoutUser,getAccessTokenFromRefreshToken,getUser}
+const updateUsername=asyncHandler(async(req,res)=>{
+    const updated_username=req.body.username;
+    if(!updated_username){
+        throw new ApiError(401,"Updated username is not provided")
+    }
+    const {username}=req?.user;
+    try{
+        [rows,fields]=await con.execute(`select username from kollege.User where username=?`,[updated_username])
+    }
+    catch(err){
+        if(rows.length>0){
+            throw new ApiError(401,"Username already exists. Please chose another username")
+        }
+        throw new ApiError(401,`Error while fetching user: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.User set username=? where username=? `,[updated_username,username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating username: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User updated successfully",{})
+    )
+})
+
+const updateFirstname=asyncHandler(async(req,res)=>{
+    const {firstname}=req.body;
+    if(!firstname){
+        throw new ApiError(401,"Updated firstname is not provided")
+    }
+    const {username}=req?.user;
+    try{
+        await con.execute(` update kollege.User set firstname=? where username=? `,[firstname,username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user firstname: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User updated successfully",{})
+    )
+})
+
+const updateLastname=asyncHandler(async(req,res)=>{
+    const {lastname}=req.body;
+    if(!lastname){
+        throw new ApiError(401,"Updated lastname is not provided")
+    }
+    const {username}=req?.user;
+    try{
+        await con.execute(` update kollege.User set lastname=? where username=? `,[lastname,username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user lastname: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User updated successfully",{})
+    )
+})
+
+const updateEmail=asyncHandler( async(req,res)=>{
+    const updated_email=req.body.email;
+    if(!updated_email){
+        throw new ApiError(401,"Updated email is not provided")
+    }
+    const {email}=req?.user;
+    try{
+        [rows,fields]=await con.execute(`select email from kollege.User where email=?`,[updated_email])
+    }
+    catch(err){
+        if(rows.length>0){
+            throw new ApiError(401,"Email is already in use. Please chose another email")
+        }
+        throw new ApiError(401,`Error while fetching user: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.User set email=? where email=? `,[updated_email,email])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user email: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User updated successfully",{})
+    )
+} )
+
+const updatePassword=asyncHandler(async(req,res)=>{
+    const {password}=req.body;
+    if(!password){
+        throw new ApiError(401,"Updated password is not provided")
+    }
+    const {username}=req?.user;
+    try{
+        await con.execute(` update kollege.User set password=? where username=? `,[password,username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user password: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User updated successfully",{})
+    )
+})
+
+export {registerUser,loginUser,logoutUser,getAccessTokenFromRefreshToken,getUser,updateUsername,updateEmail,updatePassword,updateFirstname,updateLastname}

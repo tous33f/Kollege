@@ -51,7 +51,7 @@ export default function CommunitySettingsMain() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Community Settings</h1>
           <button
-            onClick={() => navigate(`/c/${comm_name}/`)}
+            onClick={() => navigate(`/c/${comm_name}/`,{replace:true})}
             className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Back to Community

@@ -18,7 +18,7 @@ function CommunityCard({community,flag}) {
     
      className="bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer">
                 {(community.banner_url)?<img
-                  src={community.banner_url}
+                  src={` http://localhost:8080/images/${community?.banner_url} `}
                   alt={`${community.fullname} banner`} 
                   width={400} 
                   height={200} 

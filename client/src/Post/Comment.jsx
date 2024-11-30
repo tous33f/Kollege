@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useUserStore } from '../store'
 import axios from 'axios';
+import Reply from './Reply';
+import { useParams } from 'react-router';
 
-
-function Comment({comment,handleCommentDelete,setComments,comm_name}) {
+function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyButton}) {
 
     const user=useUserStore(state=>state.user)
 
     let [commentLike,setCommentLike]=useState(comment.likes)
+    let [replies,setReplies]=useState([])
+    let [reply,setReply]=useState(false)
 
     const handleCommentLike=()=>{
         if(!comment.has_liked){
@@ -62,59 +65,90 @@ function Comment({comment,handleCommentDelete,setComments,comm_name}) {
         }
       }
 
+    const handleReplies=()=>{
+      axios.get(`http://localhost:8080/rc/${comm_name}/${comment.comment_id}`,{withCredentials:true})
+      .then( ({data})=>{
+        if(data.success){
+          setReplies([...data?.data])
+          setReply(true)
+        }
+        else{
+          throw new Error(data.message)
+        }
+      } )
+      .catch(({response})=>{
+        console.log(response.data.message)
+      })
+    }
+
+    const handleReplyDelete=(reply_id)=>{
+      axios.patch(`http://localhost:8080/rc/reply`,{
+        comm_name,reply_id
+      },{withCredentials:true})
+      .then( ({data})=>{
+        if(data.success){
+          setReply(false)
+        }
+        else{
+          throw new Error(data.message)
+        }
+      } )
+      .catch(({response})=>{
+        console.log(response)
+      })
+    }
+
   return (
     <div className="flex space-x-3">
-        {(comment?.avatar_url)?<img src={comment?.avatar_url} alt={`${comment?.firstname}'s avatar`} className="rounded-full" />:
+        {(comment?.avatar_url)?<img src={` http://localhost:8080/images/${comment?.avatar_url} `} alt={`${comment?.firstname}'s avatar`} className="h-10 w-10 rounded-full" />:
         <div className='ml-5 font-medium h-fit text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{comment?.firstname[0]}</div>}
         <div className="flex-1">
             <div className="bg-gray-700 rounded-lg p-3">
                 <div className="flex justify-between items-start">
                     <span className="font-semibold">{comment?.firstname+" "+comment?.lastname}</span>
-                    <span className="text-xs text-gray-400">{ (new Date(comment?.commented_on)).toDateString() }</span>
+                    <span className="text-xs text-gray-400">{ new Date(comment.commented_on).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }</span>
                 </div>
                 <p className="text-sm mt-1">{comment?.comment}</p>
             </div>
             <div className="mt-1 flex items-center space-x-2 text-sm text-gray-400">
                 <button onClick={handleCommentLike} className="hover:text-white">{comment.has_liked? "Remove like": "Like"}</button>
                 <span>·</span>
-                <button className="hover:text-white">Reply</button>
+                <button onClick={handleReplyButton} className="hover:text-white">Reply</button>
                 <span>·</span>
                 { user.username==comment.username && <>
                 <button onClick={()=>handleCommentDelete(comment.comment_id)} className="hover:text-white">Delete</button>
                 <span>·</span> </> }
                 <span>{commentLike} likes</span>
-                <>
+                {
+                  !reply ?
+                  <>
                     <span>·</span>
-                    <button 
+                    <button onClick={handleReplies}
                     className="hover:text-white"
-                    > Replies
+                    > Show Replies
                     </button>
-                </>
+                  </> :
+                  <>
+                  <span>·</span>
+                  <button onClick={()=>{
+                    setReply(false)
+                    setReplies([])
+                  }}
+                  className="hover:text-white"
+                  > Hide Replies
+                  </button>
+                  </>
+                }
             </div>
 
             {/* Replies */}
-            {/* {comment.replies.length > 0 && ( */}
-                <div className="mt-3 space-y-3">
-                {/* {comment.replies.map((reply) => ( */}
-                    <div key={1} className="flex space-x-3 bg-gray-600 rounded-lg p-3">
-                    {/* <img src={reply.avatar} alt={`${reply.author}'s avatar`} className="w-6 h-6 rounded-full" /> */}
-                        <div className='ml-5 font-medium h-fit text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{"T"}</div>
-                        <div className='w-full'>
-                            <div className="flex justify-between items-center ">
-                                <span className="font-semibold text-sm">{"Ali Bilal"}</span>
-                                <span className="text-xs text-gray-400">{"24 Dec 2024"}</span>
-                            </div>
-                            <p className="text-sm mt-1">{"comment"}</p>
-                            <div className="mt-2 flex items-center space-x-2 text-xs text-gray-400">
-                            <button className="hover:text-white">Like</button>
-                            <span>·</span>
-                            <span>{6} likes</span>
-                            </div>
-                        </div>
-                    </div>
-                {/* ))} */}
-                </div>
-            {/* )} */}
+              <div className="mt-1 space-y-3">
+                    { reply &&
+                      replies.map((val)=>{
+                        return <Reply handleReplyDelete={()=>handleReplyDelete(val.reply_id)} reply={val} />
+                      })
+                    }
+              </div>
 
         </div>
     </div>

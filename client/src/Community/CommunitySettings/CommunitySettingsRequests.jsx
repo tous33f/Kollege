@@ -76,7 +76,7 @@ function CommunitySettingsRequests() {
             {requests.map((request,index) => (
             <li key={request?.username} className="flex items-center justify-between bg-gray-800 p-4 rounded-md">
                 <div className="flex items-center space-x-4">
-                {request?.avatar_url ? <img src={request?.avatar_url} alt={request?.firstname} className="w-10 h-10 rounded-full" />:               <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'>{request.username[0].toUpperCase()}</div>}
+                {request?.avatar_url ? <img src={` http://localhost:8080/images/${request?.avatar_url} `} alt={request?.firstname} className="w-10 h-10 rounded-full" />:               <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full'>{request.username[0].toUpperCase()}</div>}
                 <span>{request?.firstname+" "+request?.lastname}</span>
                 </div>
                 <div className="space-x-2">
