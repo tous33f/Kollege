@@ -3,6 +3,7 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
 import { con } from "../index.js"
 import { getUserCommunityId } from "../utils/UserCommunityId.js"
+import { unlink } from "fs/promises"
 
 //post
 const createCommunity=asyncHandler( async(req,res)=>{
@@ -22,7 +23,6 @@ const createCommunity=asyncHandler( async(req,res)=>{
     }
 
     let banner_url=req?.file?.filename
-
     try{
         if(banner_url){
             await con.execute( `insert into kollege.Community(comm_name,fullname,about,description,type,owner,banner_url) values(?,?,?,?,?,?,?);` , [comm_name,fullname,about,description,type,user_id,banner_url] );
@@ -347,6 +347,78 @@ const updateCommunityDescription=asyncHandler(async (req,res)=>{
     }
     res.status(201).json(
         new ApiResponse(201,"Community description updated successfully",{})
+    )
+} )
+
+const updateCommunityBanner=asyncHandler(async (req,res)=>{
+    let rows,fields
+    const {comm_name}=req.body
+    const {username,role}=req.user
+    let banner_url=req?.file?.filename
+    if(!banner_url){
+        throw new ApiError(401,"Updated banner is not provided")
+    }
+    if(role=="Member"){
+        await unlink(process.cwd()+"/public/images/"+banner_url)
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    try{
+        [rows,fields]=await con.execute(` select banner_url from kollege.Community where comm_name=? `,[comm_name])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while fetching old banner: ${err.message}`)
+    }
+    try{
+        if(rows[0].banner_url){
+            await unlink(process.cwd()+"/public/images/"+rows[0].banner_url)
+        }
+    }
+    catch(err){
+        throw new ApiError(`Error while deleteing previous banner: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.Community set banner_url=? where comm_name=? `,[banner_url,comm_name])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating banner: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community banner updated successfully",{banner_url})
+    )
+} )
+
+const removeCommunityBanner=asyncHandler(async (req,res)=>{
+    let rows,fields
+    const {comm_name}=req.body
+    const {username,role}=req.user
+    if(role=="Member"){
+        throw new ApiError(401,"User is not privileged to perform operation")
+    }
+    try{
+        [rows,fields]=await con.execute(` select banner_url from kollege.Community where comm_name=? `,[comm_name])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while fetching old banner: ${err.message}`)
+    }
+    try{
+        if(rows[0].banner_url){
+            await unlink(process.cwd()+"/public/images/"+rows[0].banner_url)
+        }
+        else{
+            throw new ApiError(401,"Community banner is already removed")
+        }
+    }
+    catch(err){
+        throw new ApiError(401,`Error while deleteing previous banner: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.Community set banner_url=? where comm_name=? `,["",comm_name])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating banner: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"Community banner removed successfully",{})
     )
 } )
 
@@ -706,5 +778,7 @@ export {
     updateCommunityName,
     updateCommunityFullname,
     updateCommunityAbout,
-    updateCommunityDescription
+    updateCommunityDescription,
+    updateCommunityBanner,
+    removeCommunityBanner
 }

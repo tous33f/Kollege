@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
 
 export default function CommunityCreationForm() {
   let [isPublic, setIsPublic] = useState(true);
@@ -59,8 +60,8 @@ export default function CommunityCreationForm() {
         throw new Error(data.message)
       }
     }
-    catch(err){
-      console.log(err.message)
+    catch({response}){
+      toast.error(response?.data?.message)
       return
     }
     try{
@@ -75,7 +76,7 @@ export default function CommunityCreationForm() {
       }
     }
     catch({response}){
-      console.log(response?.data?.message)
+      toast.error(response?.data?.message)
     }
   }
 
@@ -182,7 +183,6 @@ export default function CommunityCreationForm() {
                 name="communityTag"
                 value={tag}
                 onChange={(e)=>setTag(e.target.value)}
-                // required
                 className="w-1/2 px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button onClick={()=>{

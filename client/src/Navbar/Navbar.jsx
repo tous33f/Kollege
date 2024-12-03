@@ -2,7 +2,7 @@ import React, { useEffect,useRef,useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../store'
 import axios from 'axios'
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Navbar() {
@@ -37,7 +37,7 @@ function Navbar() {
       toast.success("Logged out successfully")
       setUser({username:"",email:""})
     })
-    .catch((err)=>toast.error(err.response.data.message))
+    .catch(({response})=>toast.error(response?.data?.message))
   }
 
   return (

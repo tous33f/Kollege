@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const EventModal = ({ event, onClose, isOpen, setEvents, setCurEvents, comm_name, role }) => {
   const modalRef = useRef(null);
@@ -62,7 +63,7 @@ const EventModal = ({ event, onClose, isOpen, setEvents, setCurEvents, comm_name
         }
       } )
       .catch(({response})=>{
-        console.log(response?.data?.message)
+        toast.error(response?.data?.message)
         onClose()
       })
   }

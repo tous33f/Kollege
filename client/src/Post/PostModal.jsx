@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import Comment from './Comment'; 
+import { toast } from 'react-toastify';
 
 export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate }) {
   
@@ -39,8 +40,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
         throw new Error(data.message)
       }
     } )
-    .catch(err=>{
-      console.log(err.message)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
       onClose()
     })
     //comments
@@ -53,8 +54,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
         throw new Error(data.message)
       }
     } )
-    .catch(err=>{
-      console.log(err.message)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
       onClose()
     })
 
@@ -84,8 +85,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
           throw new Error(data.message)
         }
       } )
-      .catch(err=>{
-        console.log(err.message)
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
       })
       return;
     }
@@ -106,8 +107,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
           throw new Error(data.message)
         }
       } )
-      .catch(err=>{
-        console.log(err.message)
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
       })
     }
 
@@ -130,8 +131,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
           throw new Error(data.message)
         }
       } )
-      .catch(err=>{
-        console.log(err.message)
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
       })
   }
 
@@ -156,8 +157,8 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
           throw new Error(data.message)
         }
       } )
-      .catch(err=>{
-        console.log(err.message)
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
       })
   }
 
@@ -176,7 +177,7 @@ export default function PostModal({ post, onClose, isOpen,comm_name,handleUpdate
       }
     } )
     .catch(({response})=>{
-      console.log(response?.data?.message)
+      toast.error(response?.data?.message)
     })
   }
 

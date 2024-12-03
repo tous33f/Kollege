@@ -4,6 +4,7 @@ import { con } from "../index.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
 import { generateAccessToken,generateRefreshToken } from "../utils/TokenGeneration.js"
+import { unlink } from "fs/promises"
 
 const registerUser=asyncHandler( async(req,res)=>{
     // console.log(req.body,req.file,req?.files)
@@ -61,7 +62,7 @@ const loginUser=asyncHandler( async(req,res)=>{
     }
 
     // find user if exists
-    [rows,fields]=await con.execute(`select user_id,username,email,password from kollege.User where email=?`,[email])
+    [rows,fields]=await con.execute(`select user_id,username,email,password,avatar_url from kollege.User where email=?`,[email])
     if(rows.length<1){
         throw new ApiError(402,"User does not exist")
     }
@@ -86,7 +87,7 @@ const loginUser=asyncHandler( async(req,res)=>{
     .cookie("accessToken",access,{httpOnly: true,secure: false, maxAge: 1000*60*60*24 })
     .cookie("refreshToken",refresh,{httpOnly: true,secure: false , maxAge: 1000*60*60*24*10 })
     .json(
-        new ApiResponse(201,"User logged in successfully",{username: rows[0].username,email: rows[0].email ,refreshToken: refresh,accessToken: access} )
+        new ApiResponse(201,"User logged in successfully",{username: rows[0].username,email: rows[0].email,avatar_url:rows[0].avatar_url ,refreshToken: refresh,accessToken: access} )
     )
 } )
 
@@ -137,7 +138,7 @@ const getUser=asyncHandler( async(req,res)=>{
     const user=req.user
     //query db
     try{
-        [rows,fields]=await con.execute(`select username,firstname,lastname,email,avatar_url from kollege.User where username=?`,[user.username])
+        [rows,fields]=await con.execute(`select username,firstname,lastname,email,avatar_url,joined_on from kollege.User where username=?`,[user.username])
     }
     catch(err){
         throw new ApiError(401,`Error while fetching user: ${err.message}`)
@@ -246,8 +247,71 @@ const updatePassword=asyncHandler(async(req,res)=>{
         throw new ApiError(401,`Error while updating user password: ${err.message}`)
     }
     res.status(201).json(
-        new ApiResponse(201,"User updated successfully",{})
+        new ApiResponse(201,"User password updated successfully",{})
     )
 })
 
-export {registerUser,loginUser,logoutUser,getAccessTokenFromRefreshToken,getUser,updateUsername,updateEmail,updatePassword,updateFirstname,updateLastname}
+const updateAvatar=asyncHandler(async(req,res)=>{
+    let rows,fields;
+    let avatar=req?.file?.filename
+    if(!avatar){
+        throw new ApiError(401,"Updated avatar is not provided")
+    }
+    const {username}=req?.user;
+    try{
+        [rows,fields]=await con.execute(` select avatar_url from kollege.User where username=? `,[username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while fetching old avatar: ${err.message}`)
+    }
+    try{
+        if(rows[0].avatar_url){
+            await unlink(process.cwd()+"/public/images/"+rows[0].avatar_url)
+        }
+    }
+    catch(err){
+        throw new ApiError(`Error while deleteing previous profile picture: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.User set avatar_url=? where username=? `,[avatar,username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user profile: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User profile updated successfully",{avatar_url: avatar})
+    )
+})
+
+const removeAvatar=asyncHandler(async(req,res)=>{
+    let rows,fields;
+    const {username}=req?.user;
+    try{
+        [rows,fields]=await con.execute(` select avatar_url from kollege.User where username=? `,[username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while fetching old avatar: ${err.message}`)
+    }
+    try{
+        if(rows[0].avatar_url){
+            await unlink(process.cwd()+"/public/images/"+rows[0].avatar_url)
+        }
+        else{
+            throw new ApiError(401,"Profile avatar is already removed")
+        }
+    }
+    catch(err){
+        throw new ApiError(401,`Error while deleteing previous avatar: ${err.message}`)
+    }
+    try{
+        await con.execute(` update kollege.User set avatar_url=? where username=? `,["",username])
+    }
+    catch(err){
+        throw new ApiError(401,`Error while updating user password: ${err.message}`)
+    }
+    res.status(201).json(
+        new ApiResponse(201,"User avatar removed successfully",{})
+    )
+})
+
+export {registerUser,loginUser,logoutUser,getAccessTokenFromRefreshToken,getUser,updateUsername,updateEmail,updatePassword,updateFirstname,updateLastname,updateAvatar,removeAvatar}

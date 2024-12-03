@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyAuth } from "../middlewares/auth.middleware.js";
-import { acceptJoinRequest, cancelJoinRequest, createCommunity, getCommunityAbout, getCommunityCardInfo, getCommunityMembers, getCommunityRequests, getCommunityRoles, getCommuntiesProtected, getCommuntiesUnProtected, getCreatedCommunities, getJoinedCommunities, getRequestedCommunities, joinCommunity, leaveCommunity, updateCommunityAbout, updateCommunityDescription, updateCommunityFullname, updateCommunityName, updatePrivilege, userCommunityInfo } from "../controllers/community.controller.js";
+import { acceptJoinRequest, cancelJoinRequest, createCommunity, getCommunityAbout, getCommunityCardInfo, getCommunityMembers, getCommunityRequests, getCommunityRoles, getCommuntiesProtected, getCommuntiesUnProtected, getCreatedCommunities, getJoinedCommunities, getRequestedCommunities, joinCommunity, leaveCommunity, removeCommunityBanner, updateCommunityAbout, updateCommunityBanner, updateCommunityDescription, updateCommunityFullname, updateCommunityName, updatePrivilege, userCommunityInfo } from "../controllers/community.controller.js";
 import { user_role } from "../middlewares/user_role.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -17,6 +17,8 @@ router.route("/update_fullname").post(verifyAuth,user_role,updateCommunityFullna
 router.route("/update_about").post(verifyAuth,user_role,updateCommunityAbout)
 router.route("/update_description").post(verifyAuth,user_role,updateCommunityDescription)
 router.route("/update_privlige").post(verifyAuth,user_role,updatePrivilege)
+router.route("/update_banner").post(verifyAuth,upload.single("banner_url"),user_role,updateCommunityBanner)
+router.route("/remove_banner").post(verifyAuth,user_role,removeCommunityBanner)
 
 //get
 router.route("/get_communities_protected").get(verifyAuth,getCommuntiesProtected)

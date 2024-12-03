@@ -1,5 +1,9 @@
+
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-toastify';
+
+
 export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm_name, handlePostCreation }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -59,8 +63,7 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
           }
         } )
         .catch( ({response})=>{
-          console.log(response)
-          console.log(response?.data?.message)
+          toast.error(response?.data?.message)
           onClose()
         } )
       }
@@ -69,7 +72,7 @@ export default function PostCreationForm({ isOpen, onClose, onSubmit, tags, comm
       }
     } )
     .catch(({response})=>{
-      console.log(response?.data?.message)
+      toast.error(response?.data?.message)
       onClose()
     })
   };

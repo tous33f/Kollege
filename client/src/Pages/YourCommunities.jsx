@@ -1,6 +1,7 @@
 import React, { useEffect,useState } from 'react'
 import CommunityCard from '../Community/CommunityCard';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function YourCommunities() {
 
@@ -13,24 +14,24 @@ function YourCommunities() {
     .then( ({data})=>{
       setCreated(data.data)
     } )
-    .catch((err)=>{
-      console.log(err)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
     })
 
     axios.get("http://localhost:8080/c/get_joined_communities",{withCredentials: true})
     .then( ({data})=>{
       setJoined(data.data)
     } )
-    .catch((err)=>{
-      console.log(err)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
     })
 
     axios.get("http://localhost:8080/c/get_requested_communities",{withCredentials: true})
     .then( ({data})=>{
       setRequested(data.data)
     } )
-    .catch((err)=>{
-      console.log(err)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
     })
 
   },[])

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 export default function EventCreationForm({ isOpen, onClose, onSubmit, tags, comm_name, setEvents, setCurEvents }) {
 
@@ -69,7 +70,7 @@ export default function EventCreationForm({ isOpen, onClose, onSubmit, tags, com
       }
     } )
     .catch(({response})=>{
-      console.log(response?.data?.message)
+      toast.error(response?.data?.message)
       onClose()
     })
 
@@ -195,8 +196,7 @@ export default function EventCreationForm({ isOpen, onClose, onSubmit, tags, com
                 Create Event
                 </button>
             </div>
-
-
+            
         </div>
       </div>
     </div>

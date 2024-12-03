@@ -1,17 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router';
-
-const members = [
-    { id: 1, name: 'John Doe', role: 'Member', avatar: 'https://via.placeholder.com/40' },
-    { id: 2, name: 'Jane Smith', role: 'Moderator', avatar: 'https://via.placeholder.com/40' },
-    { id: 3, name: 'Bob Johnson', role: 'Admin', avatar: 'https://via.placeholder.com/40' },
-  ];
-  
-  const joinRequests = [
-    { id: 1, name: 'Alice Brown', avatar: 'https://via.placeholder.com/40' },
-    { id: 2, name: 'Charlie Davis', avatar: 'https://via.placeholder.com/40' },
-  ];
+import { toast } from 'react-toastify';
 
 function CommunitySettingsRequests() {
 
@@ -30,10 +20,12 @@ function CommunitySettingsRequests() {
                     throw new Error(data.message)
                 }
             } )
-            .catch(err=>console.log(err.message))
+            .catch(({response})=>{
+                toast.error(response?.data?.message)
+            })
         }
         else{
-            console.log("Username not found")
+            toast.error("Username not found")
         }
     }
 
@@ -49,10 +41,12 @@ function CommunitySettingsRequests() {
                     throw new Error(data.message)
                 }
             } )
-            .catch(err=>console.log(err.message))
+            .catch(({response})=>{
+                toast.error(response?.data?.message)
+            })
         }
         else{
-            console.log("Username not found")
+            toast.error("Username not found")
         }
     }
 
@@ -66,7 +60,9 @@ function CommunitySettingsRequests() {
                 throw new Error(data.message)
             }
         } )
-        .catch(err=>console.log(err.message))
+        .catch(({response})=>{
+            toast.error(response?.data?.message)
+        })
     },[])
 
   return (

@@ -6,7 +6,13 @@ import { ApiError } from "../utils/ApiError.js";
 export const user_role=asyncHandler(async (req,res,next)=>{
     let rows,fields;
     const {comm_name}=req.body ;
+
+    try{
     [rows,fields]=await con.execute(`select user_id from kollege.User where username=?`,[req.user.username])
+    }
+    catch(err){
+        throw new ApiError(401,err.message)
+    }
     let {user_id}=rows[0]
     try{
         [rows,fields]=await con.execute(`select community_id from kollege.Community where comm_name=?`,[comm_name])

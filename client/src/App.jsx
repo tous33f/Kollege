@@ -10,7 +10,7 @@ import Signup from './User/Signup'
 import Login from './User/Login'
 import CommunityAbout from './Community/CommunityAbout'
 import 'react-toastify/dist/ReactToastify.css';
-import { Bounce, ToastContainer } from 'react-toastify'
+import { Bounce, toast, ToastContainer } from 'react-toastify'
 import SearchCommunity from './Pages/SearchCommunity'
 import YourCommunities from './Pages/YourCommunities'
 import ProtectedRoute from './ProtectedRoute'
@@ -25,7 +25,10 @@ import UnprotectedRoute from './UnprotectedRoute'
 import CommunityCalendar from './Community/CommunityCalendar'
 import UpdateProfile from './User/UpdateProfile'
 import ViewProfile from './User/ViewProfile'
-
+import ClassroomMain from './Community/CommunityClassroom/ClassroomMain'
+import ClassroomHome from './Community/CommunityClassroom/ClassroomHome'
+import CourseCreationForm from './Course/CourseCreationForm'
+import CoursePage from './Course/CoursePage'
 
 function App() {
 
@@ -43,7 +46,10 @@ function App() {
         throw Error(response.data.data.message)
       }
     })
-    .catch((err)=>console.log(err.response.data.message))
+    .catch(({response})=>{
+      console.log(response.data.message)
+      toast.error(response?.data?.message)
+    })
   },[])
 
   return (
@@ -65,6 +71,11 @@ function App() {
           <Route path='members' element={<ProtectedRoute> <CommunityMembers /> </ProtectedRoute>} />
           <Route path='about' element={<UnprotectedRoute> <CommunityAbout /> </UnprotectedRoute>} />
           <Route path='events' element={<ProtectedRoute> <CommunityCalendar /> </ProtectedRoute>} />
+          <Route path='classroom' element={<ProtectedRoute> <ClassroomMain /> </ProtectedRoute>}>
+            <Route path='' element={<ProtectedRoute> <ClassroomHome /> </ProtectedRoute>} />
+            <Route path='create_course' element={<ProtectedRoute> <CourseCreationForm /> </ProtectedRoute>} />
+            <Route path=':course_id' element={<ProtectedRoute> <CoursePage /> </ProtectedRoute>} />
+          </Route>
         </Route>
         <Route path='/c/:comm_name/settings' element={<ProtectedRoute> <CommunitySettingsMain /> </ProtectedRoute>}>
           <Route path='' element={<CommunitySettingsDetails />} />

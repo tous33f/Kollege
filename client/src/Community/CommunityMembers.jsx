@@ -19,10 +19,12 @@ function CommunityMembers() {
                 setMembers(data.data.members)
             }
             else{
-                throw new Error(data.message)
+                throw new Error(data?.data?.message)
             }
         } )
-        .catch(err=>console.log(err.message))
+        .catch( ({response})=>{
+            toast.error(response?.data?.message)
+        } )
     },[])
 
   return (

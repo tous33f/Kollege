@@ -3,12 +3,15 @@ import CommunityCard from '../Community/CommunityCard'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../store';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function SearchCommunity() {
 
   let [communities,setCommunities]=useState([])
-
+  let [pageCount,setPageCount]=useState(0)
+  let [curPage,setCurPage]=useState(1)
   let [searchTerm, setSearchTerm] = useState('');
+  
   const filteredCommunities = communities.filter(community => 
     community?.fullname.toLowerCase().includes(searchTerm.toLowerCase()) || community?.comm_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -29,9 +32,12 @@ function SearchCommunity() {
           setCommunities(data.data.communities)
         }
         else{
-          console.log("error")
+          throw new Error(data?.data?.message)
         }
       } )
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
+      })
       return
     }
     setSearchTerm(e.target.value)
@@ -43,14 +49,14 @@ function SearchCommunity() {
         setCommunities(data.data.communities)
       }
       else{
-        console.log("error")
+        throw new Error(data?.data?.message)
       }
     } )
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
   }
 
-  let [pageCount,setPageCount]=useState(0)
-  
-  let [curPage,setCurPage]=useState(1)
   const handlePagination=()=>{
     if(user.username){
       route="get_communities_protected"
@@ -70,9 +76,12 @@ function SearchCommunity() {
         setCurPage((prev)=>prev+1)
       }
       else{
-        console.log("error")
+        throw new Error(data?.data?.message)
       }
     } )
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
   }
 
   let user=useUserStore(state=>state.user)
@@ -94,9 +103,12 @@ function SearchCommunity() {
         console.log(data.data,curPage,pageCount)
       }
       else{
-        console.log("error")
+        throw new Error(data?.data?.message)
       }
     } )
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
   },[] )
 
   return (

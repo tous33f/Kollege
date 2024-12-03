@@ -4,6 +4,7 @@ import CommunityCard from '../Community/CommunityCard';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useUserStore } from '../store';
+import { toast } from 'react-toastify';
 
 function Home() {
 
@@ -33,13 +34,17 @@ function Home() {
         setCurPage((prev)=>prev+1)
       }
       else{
-        console.log("error")
+        throw new Error(data?.data?.message)
       }
     } )
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
   }
 
   let route;
   useEffect( ()=>{
+
     if(user.username){
       route="get_communities_protected"
     }
@@ -55,9 +60,13 @@ function Home() {
         setCommunities(data.data.communities)
       }
       else{
-        console.log("error")
+        throw new Error(data?.data?.message)
       }
     } )
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
+
   },[user] )
 
   return (

@@ -31,6 +31,8 @@ import likeRoutes from "./routes/like.routes.js"
 import commentRoutes from "./routes/comment.routes.js"
 import replyRoutes from "./routes/reply.routes.js"
 import eventRoutes from "./routes/event.routes.js"
+import courseRoutes from "./routes/course.routes.js"
+import videoRoutes from "./routes/video.routes.js"
 import { verifyAuth } from "./middlewares/auth.middleware.js"
 
 app.use("/u",userRoutes)
@@ -41,5 +43,7 @@ app.use("/l",verifyAuth,likeRoutes)
 app.use("/r",verifyAuth,commentRoutes)
 app.use("/rc",verifyAuth,replyRoutes)
 app.use("/e",verifyAuth,eventRoutes)
+app.use("/cr",verifyAuth,courseRoutes)
+app.use("/v",verifyAuth,videoRoutes)
 
 export {app}

@@ -1,6 +1,6 @@
 
 import { Router } from "express";
-import { getAccessTokenFromRefreshToken, getUser, loginUser, logoutUser, registerUser, updateEmail, updateFirstname, updateLastname, updatePassword, updateUsername } from "../controllers/user.controller.js";
+import { getAccessTokenFromRefreshToken, getUser, loginUser, logoutUser, registerUser, removeAvatar, updateAvatar, updateEmail, updateFirstname, updateLastname, updatePassword, updateUsername } from "../controllers/user.controller.js";
 import { verifyAuth } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -16,5 +16,7 @@ router.route("/email").patch(verifyAuth,updateEmail)
 router.route("/password").patch(verifyAuth,updatePassword)
 router.route("/firstname").patch(verifyAuth,updateFirstname)
 router.route("/lastname").patch(verifyAuth,updateLastname)
+router.route("/avatar_url").patch(verifyAuth,upload.single("avatar"),updateAvatar)
+router.route("/avatar_url").delete(verifyAuth,removeAvatar)
 
 export default router

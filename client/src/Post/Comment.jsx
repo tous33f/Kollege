@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useUserStore } from '../store'
 import axios from 'axios';
 import Reply from './Reply';
-import { useParams } from 'react-router';
+import { toast } from 'react-toastify';
 
 function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyButton}) {
 
@@ -34,9 +34,9 @@ function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyB
               throw Error(data.message);
             }
           } )
-          .catch( ({response})=>{
-            console.log(response.data.message)
-          } )
+          .catch(({response})=>{
+            toast.error(response?.data?.message)
+          })
         }
         else{
           axios.patch("http://localhost:8080/l/comment_like",{comm_name,comment_id:comment.comment_id},{withCredentials:true})
@@ -59,9 +59,9 @@ function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyB
               throw Error(data.message);
             }
           } )
-          .catch( ({response})=>{
-            console.log(response.data.message)
-          } )
+          .catch(({response})=>{
+            toast.error(response?.data?.message)
+          })
         }
       }
 
@@ -77,7 +77,7 @@ function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyB
         }
       } )
       .catch(({response})=>{
-        console.log(response.data.message)
+        toast.error(response?.data?.message)
       })
     }
 
@@ -94,7 +94,7 @@ function Comment({comment,handleCommentDelete,setComments,comm_name,handleReplyB
         }
       } )
       .catch(({response})=>{
-        console.log(response)
+        toast.error(response?.data?.message)
       })
     }
 

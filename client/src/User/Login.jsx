@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import { useUserStore } from '../store';
 import { useLocation, useNavigate } from 'react-router';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
@@ -33,15 +33,15 @@ function Login() {
     axios.post("http://localhost:8080/u/login",form,{withCredentials: true})
     .then( (response)=>{
       if(response.data.success){
-        const {username,email}=response.data.data
-        setUser( {username,email} )
+        const {username,email,avatar_url}=response.data.data
+        setUser( {username,email,avatar_url} )
         navigate(path,{replace:true})
       }
       else{
         throw Error(response.data.data.message)
       }
     } )
-    .catch((err)=>toast.error(err.response.data.message))
+    .catch(({response})=>toast.error(response.data.message))
   }
 
   return (
@@ -87,24 +87,12 @@ function Login() {
               >
                 Log In
               </button>
-              <a className="inline-block align-baseline font-bold text-sm text-slate-300 hover:text-slate-400" href="#">
+              <a onClick={()=>navigate("/signup")} className="inline-block align-baseline font-bold text-sm text-slate-300 hover:text-slate-400">
                 Need an account?
               </a>
             </div>
           </form>
         </div>
-        <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        />
       </main>
     </>
   )

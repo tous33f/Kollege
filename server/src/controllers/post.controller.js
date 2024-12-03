@@ -56,7 +56,7 @@ const getAllPosts=asyncHandler(async(req,res)=>{
     try{
         [rows,fields]=await con.execute(` select user_id,community_id from kollege.User_has_Community where user_id=? and community_id=? `,[user_id,community_id]);
         if(rows.length<1){
-            throw new ApiError(401,"Cannot post because user is not member of given community");
+            throw new ApiError(401,"Cannot get post because user is not member of given community");
         }
     }
     catch(err){

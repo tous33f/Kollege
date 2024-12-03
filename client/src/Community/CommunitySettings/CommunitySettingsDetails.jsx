@@ -1,11 +1,14 @@
 import React, { useState,useEffect } from 'react'
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router';
+import { toast } from 'react-toastify';
 
 function CommunitySettingsDetails() {
   
     const [community,setCommunity]=useState({})
     let [form,setForm]=useState({})
+    const [banner_url,setBanner_url]=useState(null)
+    const [clear,setClear]=useState(true)
     const {comm_name}=useParams()
     const navigate=useNavigate()
     const [tags,setTags]=useState([])
@@ -16,11 +19,15 @@ function CommunitySettingsDetails() {
       //get community info
       axios.get(`http://localhost:8080/c/${comm_name}/get_community_about`)
       .then(({data})=>{
+        if(data?.success){
           setCommunity(data.data)
-          setForm(data.data)
+          setForm(data.data)        }
+        else{
+          throw new Error(data?.data?.message)
+        }
       })
-      .catch((err)=>{
-          console.log(err.message)
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
       })
       //get community tags
       axios.get(`http://localhost:8080/t/${comm_name}`,{withCredentials: true})
@@ -30,10 +37,12 @@ function CommunitySettingsDetails() {
           setCurTags(data?.data)
         }
         else{
-          throw new Error(data.message)
+          throw new Error(data?.data?.message)
         }
       } )
-      .catch(err=>console.log(err.message))
+      .catch(({response})=>{
+        toast.error(response?.data?.message)
+      })
     },[])
 
     const handleSubmit=async()=>{
@@ -43,7 +52,7 @@ function CommunitySettingsDetails() {
                     comm_name,new_comm_name: form?.comm_name
                 },{withCredentials: true})
                 if(data?.success){
-                    console.log("Community name updated successfully")
+                    toast.success("Community name updated successfully")
                 }
                 else{
                     throw new Error("Error updating fullname:"+data?.message)
@@ -54,7 +63,7 @@ function CommunitySettingsDetails() {
                     comm_name,new_fullname: form?.fullname
                 },{withCredentials: true})
                 if(data?.success){
-                    console.log("Community fullname updated successfully")
+                    toast.success("Community fullname updated successfully")
                 }
                 else{
                     throw new Error("Error updating fullname:"+data?.message)
@@ -65,7 +74,7 @@ function CommunitySettingsDetails() {
                     comm_name,new_about: form?.about
                 },{withCredentials: true})
                 if(data?.success){
-                    console.log("Community about updated successfully")
+                    toast.success("Community about updated successfully")
                 }
                 else{
                     throw new Error("Error updating about:"+data?.message)
@@ -76,16 +85,28 @@ function CommunitySettingsDetails() {
                     comm_name,new_description: form?.description
                 },{withCredentials: true})
                 if(data?.success){
-                    console.log("Community description updated successfully")
+                    toast.success("Community description updated successfully")
                 }
                 else{
-                    throw new Error("Error description about:"+data?.message)
+                    throw new Error("Error updating description:"+data?.message)
                 }
+            }
+            if(banner_url){
+              let form=new FormData()
+              form.append("banner_url",banner_url)
+              form.append("comm_name",comm_name)
+              let {data}=await axios.post(`http://localhost:8080/c/update_banner`,form,{withCredentials: true})
+              if(data?.success){
+                toast.success("Community banner updated successfully")
+              }
+              else{
+                  throw new Error("Error updating banner:"+data?.message)
+              }
             }
             navigate(`/c/${form?.comm_name}`)
         }
-        catch(err){
-            console.log(err.message)
+        catch({response}){
+            toast.error(response?.data?.message)
         }
     }
     
@@ -125,16 +146,45 @@ function CommunitySettingsDetails() {
                 className="w-full px-3 py-2 bg-slate-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            {/* community banner  */}
             <div>
-              <label htmlFor="communityBanner" className="block text-sm font-medium text-slate-400 mb-2">
-                Community Banner
-              </label>
-              <input
-                type="file"
-                id="communityBanner"
+            <label htmlFor="bannerImage" className="block text-sm font-medium text-slate-300 mb-2">
+              Upload a new user profile image
+            </label>
+            <div className="mt-1 flex items-center">
+                <input key={clear}
+                className="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                id="avatar" 
+                type="file" 
                 accept="image/*"
-                className="w-full px-3 py-2 bg-slate-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                name='banner_url'
+                onChange={(e)=>setBanner_url(e.target.files[0])}
+                />
+                { banner_url && <svg onClick={()=>{
+                  setClear(prev=>!prev)
+                  setBanner_url(null)
+                }} className='ml-3 cursor-pointer' fill="#4b5563" height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 490 490" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <polygon points="456.851,0 245,212.564 33.149,0 0.708,32.337 212.669,245.004 0.708,457.678 33.149,490 245,277.443 456.851,490 489.292,457.678 277.331,245.004 489.292,32.337 "></polygon> </g></svg>
+                }
+                <button onClick={()=>{
+                  //removing community banner
+                  axios.post(`http://localhost:8080/c/remove_banner`,{comm_name},{withCredentials: true})
+                  .then( ({data})=>{
+                    if(data?.success){
+                      toast.success("Community banner removed successfully")
+                    }
+                    else{
+                      throw new Error(data?.message)
+                    }
+                  } )
+                  .catch(({response})=>{
+                    toast.error(response?.data?.message)
+                  })
+
+                }} className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 ml-4">
+                Remove Banner
+                </button>
+            </div>
+            {/* community about  */}
             </div>
             <div>
               <label htmlFor="communityAbout" className="block text-sm font-medium text-slate-400 mb-2">

@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
-import CommunityNavbar from './CommunityNavbar'
 import EventCreationForm from '../Event/EventCreationForm'
 import { useNavigate, useParams } from 'react-router'
 import axios from 'axios'
 import EventModal from '../Event/EventModal'
+import { toast } from 'react-toastify'
 
 const localizer = momentLocalizer(moment)
 
@@ -52,11 +52,11 @@ export default function CommunityCalendar() {
         setCurEvents(data?.data.slice(0,6))
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
     .catch(({response})=>{
-      console.log(response?.message)
+      toast.err(response?.message)
     })
 
     axios.get(`http://localhost:8080/c/${comm_name}/user_community_info`,{withCredentials: true})
@@ -64,10 +64,13 @@ export default function CommunityCalendar() {
       if(data.success){
         setUserCommunityInfo(data.data)
       }
+      else{
+        throw new Error(data?.data?.message)
+      }
     } )
     .catch(({response})=>{
+      toast.err(response?.message)
       navigate(`/${comm_name}/`)
-      console.log(response?.message)
     })
 
     

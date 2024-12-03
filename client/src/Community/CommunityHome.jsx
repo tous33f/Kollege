@@ -34,10 +34,12 @@ function CommunityHome() {
         setPosts(data?.data)
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>console.log(err.message))
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
   }
 
   const handleUpdate=(post_id,likes,comments)=>{
@@ -66,10 +68,12 @@ function CommunityHome() {
         setTags(data?.data)
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>console.log(err.message))
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
 
     //get posts
     axios.get(`http://localhost:8080/p/${comm_name}`,{withCredentials: true})
@@ -78,11 +82,12 @@ function CommunityHome() {
         setPosts(data?.data)
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>console.log(err.message))
-
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
     //get event
     axios.get(`http://localhost:8080/e/${comm_name}`,{withCredentials: true})
     .then( ({data})=>{
@@ -90,12 +95,12 @@ function CommunityHome() {
         setEvent(data?.data[0])
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(({response})=>{
-      console.log(response?.message)
-    })
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
 
   },[])
 
@@ -132,7 +137,7 @@ function CommunityHome() {
             <div onClick={() => setIsPostFormOpen(true)} className="cursor-pointer bg-slate-800 rounded-lg p-4">
               <div className="flex items-center space-x-4">
               {(avatar_url)?<img src={` http://localhost:8080/images/${avatar_url} `} alt={`${username}'s avatar`} className="w-10 h-10 rounded-full" />:
-                  <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{username[0]}</div>}
+                  <div className='ml-5 font-medium text-xl cursor-pointer bg-slate-900  px-4 py-2 rounded-full' >{username[0].toUpperCase()}</div>}
                  
                 <div
                   placeholder="Write something"

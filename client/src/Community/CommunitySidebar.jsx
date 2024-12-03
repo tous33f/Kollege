@@ -24,10 +24,12 @@ function CommunitySidebar() {
         toast.success("Request cancelled successfully")
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>toast.error(err.message))
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
   }
 
   const handleJoin=()=>{
@@ -46,21 +48,27 @@ function CommunitySidebar() {
         }
       }
       else{
-        toast.error(err.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>console.log(err.message))
-    console.log(userCommunityInfo.membership)
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
   }
 
   useEffect(()=>{
     axios.get(`http://localhost:8080/c/${comm_name}/get_community_card_info`)
     .then(({data})=>{
-      setCommunity(data.data)
-    })
-    .catch((err)=>{
-      console.log(err.message)
-    })
+      if(data?.success){
+        setCommunity(data.data)
+      }
+      else{
+        throw new Error(data?.data?.message)
+      }
+    } )
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
 
     axios.get(`http://localhost:8080/c/${comm_name}/user_community_info`,{withCredentials: true})
     .then( ({data})=>{
@@ -74,7 +82,7 @@ function CommunitySidebar() {
   return (
     <div className="space-y-6">
             <div className="bg-gray-800 rounded-lg overflow-hidden">
-              <img src={community?.banner_url? `http://localhost:8080/images/${community?.banner_url}` : "https://via.placeholder.com/400x200"} alt="Community banner" className="w-full h-32 object-cover" />
+              <img src={community?.banner_url? `http://localhost:8080/images/${community?.banner_url}` : "https://g-p1v8sxx1jj4.vusercontent.net/placeholder.svg?height=100&width=200"} alt="Community banner" className="w-full h-32 object-cover" />
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-2">{community.fullname}</h2>
                 <p className="text-gray-400 mb-4">{community.about}</p>

@@ -27,6 +27,7 @@ const getTags=asyncHandler(async(req,res)=>{
     try{
         [rows,fields]=await con.execute(` select t.tag_id,t.tag_name from kollege.Community_has_Tag cht inner join kollege.Tag t on cht.tag_id=t.tag_id where community_id=? `,[community_id]);
     }
+    
     catch(err){
         throw new ApiError(401,err.message);
     }

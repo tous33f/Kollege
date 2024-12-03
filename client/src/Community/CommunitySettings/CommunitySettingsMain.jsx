@@ -3,6 +3,7 @@ import CommunitySettingsNavbar from './CommunitySettingsNavbar';
 import { useParams,Outlet, useNavigate } from 'react-router';
 import axios from 'axios';
 import { useUserStore } from '../../store';
+import { toast } from 'react-toastify';
 
 export default function CommunitySettingsMain() {
 
@@ -32,14 +33,26 @@ export default function CommunitySettingsMain() {
       if(data.success){
         setUserCommunityInfo(data.data)
       }
-    } )
+      else{
+        throw new Error(data?.data?.message)
+      }
+    })
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
 
     axios.get(`http://localhost:8080/c/${comm_name}/get_community_about`,{withCredentials: true})
     .then( ({data})=>{
       if(data.success){
         setCommunityOwner(data?.data?.username)
       }
-    } )
+      else{
+        throw new Error(data?.data?.message)
+      }
+    })
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
+    })
 
   },[])
 

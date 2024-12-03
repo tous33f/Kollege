@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function ViewProfile() {
 
@@ -10,11 +11,11 @@ export default function ViewProfile() {
     useEffect( ()=>{
         axios.get(` http://localhost:8080/u `,{withCredentials:true})
         .then( ({data})=>{
-          console.log(data?.data)
             setUser(data?.data)
         } )
         .catch( ({response})=>{
             console.log(response?.data?.message)
+            toast.error(response?.data?.message)
             navigate(-1)
         } )
       }, [] )
@@ -49,10 +50,7 @@ export default function ViewProfile() {
             <h2 className="text-lg font-semibold text-white mb-2">Account Information</h2>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <span className="font-medium">Member since:</span> January 1, 2023
-              </li>
-              <li>
-                <span className="font-medium">Last login:</span> Today at 2:30 PM
+                <span className="font-medium">Member since:</span> {new Date(user?.joined_on).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
               </li>
             </ul>
           </div>

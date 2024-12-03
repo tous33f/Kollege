@@ -15,10 +15,12 @@ function CommunityNavbar() {
         setDisplay(true)
       }
       else{
-        throw new Error(data.message)
+        throw new Error(data?.data?.message)
       }
     } )
-    .catch(err=>console.log(err.message))
+    .catch( ({response})=>{
+      toast.error(response?.data?.message)
+    } )
   })
 
   return (
@@ -30,7 +32,6 @@ function CommunityNavbar() {
             <NavLink to="classroom"  className={({ isActive }) => (isActive ? active : notActive)} >Classroom</NavLink>
             <NavLink to="events"  className={({ isActive }) => (isActive ? active : notActive)} >Calendar</NavLink>
             <NavLink to="members"  className={({ isActive }) => (isActive ? active : notActive)} >Members</NavLink>
-            <NavLink to="leaderboards"  className={({ isActive }) => (isActive ? active : notActive)} >Leaderboards</NavLink>
             <NavLink to="about" className={({ isActive }) => (isActive ? active : notActive)} >About</NavLink>
           </div>
         </div>

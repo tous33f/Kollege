@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import { useUserStore } from '../../store';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function CommunitySettingsMembers() {
 
@@ -19,7 +20,7 @@ function CommunitySettingsMembers() {
     );
 
     const handleChange=(role,username,index)=>{
-        if(role && username && role){
+        if(role && username){
             let newMembers=[...members]
             newMembers[index].role=role
             axios.post( `http://localhost:8080/c/update_privlige`,{
@@ -33,10 +34,12 @@ function CommunitySettingsMembers() {
                     throw new Error(data.message)
                 }
             } )
-            .catch(err=>console.log(err.message))
+            .catch(({response})=>{
+                toast.error(response?.data?.message)
+            })
         }
         else{
-            console.log("Error updating user role")
+            toast.error("Username or role of user being removed is not given")
         }
     }
 
@@ -53,10 +56,12 @@ function CommunitySettingsMembers() {
                     throw new Error(data.message)
                 }
             } )
-            .catch(err=>console.log(err.message))
+            .catch(({response})=>{
+                toast.error(response?.data?.message)
+            })
         }
         else{
-            console.log("Username not found")
+            toast.error("Username not found")
         }
     }
 
@@ -66,7 +71,13 @@ function CommunitySettingsMembers() {
         if(data.success){
             setUserCommunityInfo(data.data)
         }
-        } )
+        else{
+            throw new Error(data?.data?.message)
+          }
+        })
+        .catch(({response})=>{
+          toast.error(response?.data?.message)
+        })
 
         axios.get(`http://localhost:8080/c/${comm_name}/get_community_roles`,{withCredentials: true})
         .then( ({data})=>{
@@ -74,10 +85,12 @@ function CommunitySettingsMembers() {
                 setMembers(data.data)
             }
             else{
-                throw new Error(data.message)
+                throw new Error(data?.data?.message)
             }
-        } )
-        .catch(err=>console.log(err.message))
+        })
+        .catch(({response})=>{
+            toast.error(response?.data?.message)
+        })
     },[])
 
   return (

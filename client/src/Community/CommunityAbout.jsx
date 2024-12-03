@@ -3,6 +3,7 @@ import { useState,useEffect } from 'react';
 import { useParams } from 'react-router';
 import axios from 'axios';
 import CommunitySidebar from './CommunitySidebar'
+import { toast } from 'react-toastify';
 
 export default function CommunityAbout() {
 
@@ -11,10 +12,15 @@ export default function CommunityAbout() {
   useEffect(()=>{
     axios.get(`http://localhost:8080/c/${comm_name}/get_community_about`)
     .then(({data})=>{
-      setCommunity(data.data)
+      if(data?.success){
+        setCommunity(data.data)
+      }
+      else{
+        throw new Error(data?.data?.message)
+      }
     })
-    .catch((err)=>{
-      console.log(err.message)
+    .catch(({response})=>{
+      toast.error(response?.data?.message)
     })
   },[])
 
@@ -38,7 +44,7 @@ export default function CommunityAbout() {
                 className="w-full h-64 object-cover"
                 /> :
                 <img
-                src="https://g-p1v8sxx1jj4.vusercontent.net/placeholder.svg" 
+                src="https://g-p1v8sxx1jj4.vusercontent.net/placeholder.svg?height=100&width=200" 
                 alt={`${community.fullname} banner`} 
                 width={400} 
                 height={800} 
