@@ -4,6 +4,7 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
 import { con } from "../index.js"
 import { getUserCommunityId } from "../utils/UserCommunityId.js"
+import {unlink} from "fs/promises"
 
 //get
 const getPost=asyncHandler(async(req,res)=>{
@@ -141,6 +142,7 @@ const deletePost=asyncHandler(async(req,res)=>{
     let role
     const {username}=req.user;
     //check if user is member of community
+    
     const {user_id,community_id}=await getUserCommunityId(username,comm_name);
     try{
         [rows,fields]=await con.execute(` select user_id,community_id,role from kollege.User_has_Community where user_id=? and community_id=? `,[user_id,community_id]);
@@ -154,7 +156,7 @@ const deletePost=asyncHandler(async(req,res)=>{
     }
     //check if post exists and user is allowed to update post
     try{
-        [rows,fields]=await con.execute(` select user_id,community_id from kollege.Post where post_id=?`,[post_id]);
+        [rows,fields]=await con.execute(` select user_id,community_id,graphics_url from kollege.Post where post_id=?`,[post_id]);
         if(rows.length<1){
             throw new ApiError(401,"Given post does not exist");
         }
@@ -172,8 +174,16 @@ const deletePost=asyncHandler(async(req,res)=>{
     catch(err){
         throw new ApiError(401,err.message);
     }
+    try{
+        if(rows[0].graphics_url){
+            await unlink(process.cwd()+"/public/images/"+rows[0].graphics_url)
+        }
+    }
+    catch(err){
+        throw new ApiError(401,`Error while deleteing post graphics_url locally: ${err.message}`)
+    }
     res.status(201).json(
-        new ApiResponse(201,"Post deleted successfully")
+        new ApiResponse(201,"Post deleted successfully",{})
     )
 })
 

@@ -118,6 +118,7 @@ function CommunityHome() {
           onClose={() => setSelectedPost(null)}
           comm_name={comm_name}
           handleUpdate={handleUpdate}
+          setPosts={setPosts}
         />
       )}
 
