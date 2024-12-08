@@ -23,8 +23,8 @@ function CourseCard({course}) {
         />
         }
         <div className="p-4 flex-col justify-between  mb-2 text-slate-200 ">
-            <h3 className=" text-2xl font-semibold mb-2">{course?.name}</h3>
-            <p className=' text-lg font-normal ' >{course?.about}</p>
+            <h3 className=" text-lg font-semibold mb-2">{course?.name}</h3>
+            <p className=' text-sm font-normal ' >{course?.about}</p>
         </div>
     </div>
   )

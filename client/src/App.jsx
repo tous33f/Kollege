@@ -5,7 +5,7 @@ import Footer from './Footer/Footer'
 import CommunityHome from './Community/CommunityHome'
 import CommunityCreationForm from './Community/CommunityCreationForm'
 import CommunityMain from "./Community/CommunityMain"
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import Signup from './User/Signup'
 import Login from './User/Login'
 import CommunityAbout from './Community/CommunityAbout'
@@ -29,12 +29,16 @@ import ClassroomMain from './Community/CommunityClassroom/ClassroomMain'
 import ClassroomHome from './Community/CommunityClassroom/ClassroomHome'
 import CourseCreationForm from './Course/CourseCreationForm'
 import CoursePage from './Course/CoursePage'
+import NoRoute from './Pages/NoRoute'
+import ChatPage from './Chat/ChatPage'
 
 function App() {
 
   let [loggedIn,setLoggedIn]=useState(false)
 
   let {user,setUser}=useUserStore()
+
+  let path=useLocation().pathname;
 
   useEffect(()=>{
     axios.get("http://localhost:8080/u",{withCredentials: true})
@@ -48,12 +52,11 @@ function App() {
     })
     .catch(({response})=>{
       console.log(response.data.message)
-      toast.error(response?.data?.message)
     })
   },[])
 
   return (
-    <div className='bg-slate-900 h-full' >
+    <div className='bg-slate-900 h-full w-full' >
       <Navbar />
 
       {/* Routes  */}
@@ -64,6 +67,7 @@ function App() {
         <Route path='create_community' element={<ProtectedRoute> <CommunityCreationForm /> </ProtectedRoute>} />
         <Route path='update_profile' element={<ProtectedRoute> <UpdateProfile /> </ProtectedRoute>} />
         <Route path='view_profile' element={<ProtectedRoute> <ViewProfile /> </ProtectedRoute>} />
+        <Route path='chat' element={<ProtectedRoute> <ChatPage /> </ProtectedRoute>} />
         <Route path='signup' element={<Signup />} />
         <Route path='login' element={<Login />} />
         <Route path='c/:comm_name' element={<CommunityMain /> }>
@@ -82,9 +86,11 @@ function App() {
           <Route path='members' element={<CommunitySettingsMembers />} />
           <Route path='requests' element={<CommunitySettingsRequests />} />
         </Route>
+        <Route path='*' element={<NoRoute />} />
       </Routes>
 
-      <Footer/>
+      {path!='/chat'?<Footer/>:<></>}
+      
 
       <ToastContainer
       position="bottom-right"

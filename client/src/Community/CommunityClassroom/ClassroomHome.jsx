@@ -38,7 +38,7 @@ function ClassroomHome() {
 
   return (
 
-    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200'>
+    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200 md:min-h-screen'>
         <h1 className="text-4xl font-bold mb-6">Discover Courses</h1>{ userCommunityInfo && userCommunityInfo?.info?.role!="Member" && 
         <p className="text-xl mb-8 max-w-2xl text-center">or <Link className='text-orange-400 font-bold' to="create_course" >create a new course</Link> </p>
         }

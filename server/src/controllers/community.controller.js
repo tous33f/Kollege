@@ -665,7 +665,7 @@ const getCommunityMembers=asyncHandler(async(req,res)=>{
     
     //admins
     try{
-        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Admin"])
+        [rows,fields]=await con.execute(`select u.user_id,u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Admin"])
     }
     catch(err){
         throw new ApiError(401,err.message)
@@ -674,7 +674,7 @@ const getCommunityMembers=asyncHandler(async(req,res)=>{
 
     //moderators
     try{
-        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Moderator"])
+        [rows,fields]=await con.execute(`select u.user_id,u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Moderator"])
     }
     catch(err){
         throw new ApiError(401,err.message)
@@ -683,7 +683,7 @@ const getCommunityMembers=asyncHandler(async(req,res)=>{
 
     //members
     try{
-        [rows,fields]=await con.execute(`select u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Member"])
+        [rows,fields]=await con.execute(`select u.user_id,u.username,u.firstname,u.lastname,u.avatar_url from kollege.User_has_Community uhc inner join kollege.User u on uhc.user_id=u.user_id where uhc.community_id=? and uhc.role=?`,[community_id,"Member"])
     }
     catch(err){
         throw new ApiError(401,err.message)

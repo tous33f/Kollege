@@ -103,7 +103,6 @@ function CommunitySettingsDetails() {
                   throw new Error("Error updating banner:"+data?.message)
               }
             }
-            navigate(`/c/${form?.comm_name}`)
         }
         catch({response}){
             toast.error(response?.data?.message)

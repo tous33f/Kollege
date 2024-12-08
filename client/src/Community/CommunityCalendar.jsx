@@ -105,14 +105,14 @@ export default function CommunityCalendar() {
       )}
 
     {/* <CommunityNavbar /> */}
-    <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col px-20 py-8">
+    <div className="md:min-h-screen bg-slate-900 text-slate-200 flex flex-col md:px-20 px-16 py-8">
 
       {/* Main Content */}
-      <div className="flex-grow p-4 flex">
+      <h1 className="md:px-4 md:text-3xl text-xl font-bold mb-6">Community Calendar</h1>
+      <div className="flex-grow md:p-4 flex flex-wrap">
         {/* Calendar Section */}
-        <div className="flex-grow pr-4">
-          <h1 className="text-3xl font-bold mb-6">Community Calendar</h1>
-          <div className="h-[calc(100vh-200px)] bg-white rounded-lg overflow-hidden">
+        <div className="flex-grow md:pr-4">
+          <div className="md:h-[calc(100vh-200px)] h-[calc(100vh-600px)] min-h-72 bg-white rounded-lg overflow-hidden">
             <Calendar
               localizer={localizer}
               events={events}
@@ -130,7 +130,7 @@ export default function CommunityCalendar() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-80 bg-slate-800 rounded-lg p-4 h-fit">
+        <div className="md:w-80 w-full mt-6 md:mt-0 bg-slate-800 rounded-lg p-4 h-fit  ">
           <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
           <ul className="space-y-2 mb-6">
             {curEvents.map((event, index) => (

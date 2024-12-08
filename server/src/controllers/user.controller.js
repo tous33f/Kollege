@@ -138,7 +138,7 @@ const getUser=asyncHandler( async(req,res)=>{
     const user=req.user
     //query db
     try{
-        [rows,fields]=await con.execute(`select username,firstname,lastname,email,avatar_url,joined_on from kollege.User where username=?`,[user.username])
+        [rows,fields]=await con.execute(`select user_id,username,firstname,lastname,email,avatar_url,joined_on from kollege.User where username=?`,[user.username])
     }
     catch(err){
         throw new ApiError(401,`Error while fetching user: ${err.message}`)

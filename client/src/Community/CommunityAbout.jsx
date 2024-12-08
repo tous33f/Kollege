@@ -4,8 +4,11 @@ import { useParams } from 'react-router';
 import axios from 'axios';
 import CommunitySidebar from './CommunitySidebar'
 import { toast } from 'react-toastify';
+import { useUserStore } from '../store';
 
 export default function CommunityAbout() {
+
+  let user=useUserStore(state=>state.user)
 
   const [community,setCommunity]=useState({})
   const {comm_name}=useParams()
@@ -81,11 +84,11 @@ export default function CommunityAbout() {
                 alt="Creator avatar" 
                 className="w-8 h-8 rounded-full"
                 />:
-                <img 
-                  src={"https://via.placeholder.com/32" }
-                  alt="Creator avatar" 
-                  className="w-8 h-8 rounded-full"
-                />
+                <div 
+              className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white cursor-pointer"
+              >
+              {user?.username ? user?.username[0].toUpperCase() : 'U'}
+              </div>
                 }
                 <span>By {community?.firstname+" "+community?.lastname}</span>
               </div>

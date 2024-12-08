@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import http from "http"
 
 const app=express()
 
@@ -33,6 +34,7 @@ import replyRoutes from "./routes/reply.routes.js"
 import eventRoutes from "./routes/event.routes.js"
 import courseRoutes from "./routes/course.routes.js"
 import videoRoutes from "./routes/video.routes.js"
+import chatRoutes from "./routes/chat.routes.js"
 import { verifyAuth } from "./middlewares/auth.middleware.js"
 
 app.use("/u",userRoutes)
@@ -45,5 +47,37 @@ app.use("/rc",verifyAuth,replyRoutes)
 app.use("/e",verifyAuth,eventRoutes)
 app.use("/cr",verifyAuth,courseRoutes)
 app.use("/v",verifyAuth,videoRoutes)
+app.use("/ch",verifyAuth,chatRoutes)
 
-export {app}
+let server=http.createServer(app)
+
+//websocket server
+import {Server} from "socket.io"
+
+let io=new Server(server,{cors: {origin: "http://localhost:5173",methods: ["GET","POST"]}})
+
+io.on("connection",(socket)=>{
+    let {send,recv}=socket.handshake.query
+    // console.log(` ${send} connected`)
+    if(socket.rooms.has(`${send}:${recv}`)){
+        socket.join(`${recv}:${send}`)
+    }
+    else{
+        socket.join(`${send}:${recv}`)
+    }
+
+    socket.on("chat",(msg)=>{
+        let {send,recv}=msg;
+        // console.log(msg)
+        if(socket.rooms.has(`${send}:${recv}`)){
+            socket.to(`${recv}:${send}`).emit("chat",msg)
+        }
+        else{
+            socket.to(`${send}:${recv}`).emit("chat",msg)
+        }
+    })
+
+    // socket.on("disconnect",()=>console.log(` ${send} disconnected`))
+})
+
+export {server as app}

@@ -129,6 +129,4 @@ function CommunitySidebar() {
   )
 }
 
-<button className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Join now</button>
-
 export default CommunitySidebar

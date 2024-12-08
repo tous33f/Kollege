@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CommunitySettingsNavbar from './CommunitySettingsNavbar';
-import { useParams,Outlet, useNavigate } from 'react-router';
+import { useParams,Outlet, useNavigate,Navigate } from 'react-router';
 import axios from 'axios';
 import { useUserStore } from '../../store';
 import { toast } from 'react-toastify';
@@ -17,13 +17,13 @@ export default function CommunitySettingsMain() {
     axios.post(`http://localhost:8080/c/leave_community`,{comm_name},{withCredentials:true})
     .then( ({data})=>{
         if(data.success){
-          navigate(`/c/${comm_name}/about`)
+          navigate(`/`,{replace:true})
         }
         else{
             throw new Error(data.message)
         }
     } )
-    .catch(err=>console.log(err.message))
+    .catch(({response})=>console.log(response?.data?.message))
   }
   
   useEffect(()=>{

@@ -8,6 +8,7 @@ import axios from 'axios';
 import PostCard from '../Post/PostCard';
 import CommunitySidebar from './CommunitySidebar'
 import { useUserStore } from '../store';
+import { toast } from 'react-toastify';
 
 
 function CommunityHome() {
@@ -72,7 +73,7 @@ function CommunityHome() {
       }
     } )
     .catch( ({response})=>{
-      toast.error(response?.data?.message)
+      console.log(response?.data?.message)
     } )
 
     //get posts
@@ -86,7 +87,7 @@ function CommunityHome() {
       }
     } )
     .catch( ({response})=>{
-      toast.error(response?.data?.message)
+      console.log(response?.data?.message)
     } )
     //get event
     axios.get(`http://localhost:8080/e/${comm_name}`,{withCredentials: true})
@@ -99,17 +100,16 @@ function CommunityHome() {
       }
     } )
     .catch( ({response})=>{
-      toast.error(response?.data?.message)
+      console.log(response?.data?.message)
     } )
 
   },[])
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="md:min-h-screen bg-slate-900 text-slate-100">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <>
-
       {/* Post Model  */}
       {selectedPost && (
         <PostModal

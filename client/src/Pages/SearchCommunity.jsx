@@ -112,11 +112,11 @@ function SearchCommunity() {
   },[] )
 
   return (
-    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200'>
-        <h1 className="text-4xl font-bold mb-6">Discover Communities</h1>
-        <p className="text-xl mb-8 max-w-2xl text-center">or <Link className='text-orange-400 font-bold' to="/create_community" >create your own</Link> </p>
-        <div className='flex items-center bg-slate-800 mb-12 px-1 py-3 rounded-lg text-slate-300 w-2/5' >
-            <input type="text" className='outline-none bg-transparent px-3 w-full text-lg font-semibold' placeholder='Search for anything' value={searchTerm} onChange={(e)=>handleSearch(e)} />
+    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200 min-h-screen'>
+        <h1 className="md:text-4xl text-2xl font-bold mb-6">Discover Communities</h1>
+        <p className="md:text-xl text-sm mb-8 max-w-2xl text-center">or <Link className='text-orange-400 font-bold' to="/create_community" >create your own</Link> </p>
+        <div className='flex items-center bg-slate-800 mb-12 px-1 py-3 rounded-lg text-slate-300 md:w-2/5 w-5/6' >
+            <input type="text" className='outline-none bg-transparent px-3 w-full md:text-lg text-sm font-semibold' placeholder='Search for anything' value={searchTerm} onChange={(e)=>handleSearch(e)} />
         </div>
 
         <div className="w-full max-w-7xl">

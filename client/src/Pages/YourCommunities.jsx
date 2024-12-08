@@ -37,7 +37,7 @@ function YourCommunities() {
   },[])
 
   return (
-    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200'>
+    <div className=' flex-grow flex flex-col items-center justify-start px-6 py-12 text-slate-200 min-h-screen'>
 
         <div className="w-full max-w-7xl">
           <h2 className="text-2xl font-bold mb-6">Created Communities</h2>

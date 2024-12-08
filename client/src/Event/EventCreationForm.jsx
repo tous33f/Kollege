@@ -82,7 +82,7 @@ export default function EventCreationForm({ isOpen, onClose, onSubmit, tags, com
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div 
         ref={modalRef}
-        className="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl"
+        className="bg-gray-800 rounded-lg shadow-xl md:w-full w-5/6 max-w-2xl"
       >
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-4 text-white">Create a New Event</h2>

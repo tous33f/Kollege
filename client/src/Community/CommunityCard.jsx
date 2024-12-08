@@ -33,10 +33,10 @@ function CommunityCard({community,flag}) {
       }
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-slate-200 text-lg font-semibold">{community.fullname}</h3>
+          <h3 className="text-slate-200 md:text-lg text-base font-semibold">{community.fullname}</h3>
           <p className='text-slate-900 bg-slate-200 rounded-2xl px-2 py-1 font-semibold text-xs hover:bg-gray-300' >{community.type}</p>
         </div>
-        <p className="text-sm text-slate-400 mb-4">{community.about}</p>
+        <p className="text-sm text-slate-400 mb-2 md:mb-4">{community.about}</p>
         <div className="flex justify-between items-center">
           <span className="text-sm text-slate-500">{community.total_members.toLocaleString()} members</span>
           {(!community.joined)?<button size="sm" className=" text-slate-200 bg-slate-900 px-3 py-2 rounded-lg hover:bg-slate-950 ">Join</button>:<></> }
