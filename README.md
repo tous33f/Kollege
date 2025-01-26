@@ -22,6 +22,7 @@ unified space for learning and collaboration.
 - 🤝 Live Chat 
 - 🔒 Secure Authentication 
 - 📱 Mobile-Friendly Design 
+
 Packed with countless extras!
 
 
