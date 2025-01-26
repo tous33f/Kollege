@@ -1,6 +1,9 @@
 # environment variables file
 .env
 
+# images
+/server/public/images
+
 # Logs
 logs
 *.log

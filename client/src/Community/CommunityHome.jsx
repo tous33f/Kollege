@@ -15,7 +15,6 @@ function CommunityHome() {
 
   const avatar_url=useUserStore(state=>state.user.avatar_url)
   const username=useUserStore(state=>state.user.username)
-  console.log(avatar_url)
 
   const [selectedPost, setSelectedPost] = useState(null);
   const [isPostFormOpen, setIsPostFormOpen] = useState(false);

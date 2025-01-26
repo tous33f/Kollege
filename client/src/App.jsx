@@ -31,6 +31,7 @@ import CourseCreationForm from './Course/CourseCreationForm'
 import CoursePage from './Course/CoursePage'
 import NoRoute from './Pages/NoRoute'
 import ChatPage from './Chat/ChatPage'
+import LivestreamPage from './Livestream/LivestreamPage'
 
 function App() {
 
@@ -72,6 +73,7 @@ function App() {
         <Route path='login' element={<Login />} />
         <Route path='c/:comm_name' element={<CommunityMain /> }>
           <Route path='' element={<ProtectedRoute> <CommunityHome /> </ProtectedRoute>} />
+          <Route path='live' element={ <ProtectedRoute>  <LivestreamPage /> </ProtectedRoute>  } />
           <Route path='members' element={<ProtectedRoute> <CommunityMembers /> </ProtectedRoute>} />
           <Route path='about' element={<UnprotectedRoute> <CommunityAbout /> </UnprotectedRoute>} />
           <Route path='events' element={<ProtectedRoute> <CommunityCalendar /> </ProtectedRoute>} />

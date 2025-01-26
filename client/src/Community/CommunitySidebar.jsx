@@ -119,7 +119,11 @@ function CommunitySidebar() {
                     ? <button onClick={handleJoin} className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Join now</button>
                     : ( userCommunityInfo?.membership==1 
                       ? <button onClick={handleCancel} className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Cancel Request</button>
-                      : <Link to={`/c/${comm_name}/settings`} > <button className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Settings</button> </Link>
+                      : <>
+                        <Link to={`/c/${comm_name}/settings`} > <button className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Settings</button> </Link> 
+                        <Link to={`/c/${comm_name}/live`} > <button className={`bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg ${(userCommunityInfo?.info?.role!="Member")? "hidden": "" }`} > Watch Livestream </button> </Link>
+                        <Link to={`/c/${comm_name}/live`} > <button className={`bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg ${(userCommunityInfo?.info?.role=="Member")? "hidden": "" }`} > Go Live </button> </Link>
+                        </>
                      ) ) 
                   : <button onClick={()=>navigate("/login")} className='bg-slate-900 hover:bg-slate-950 w-full rounded-lg mt-6 py-2 text-lg' >Join now</button>
                 }

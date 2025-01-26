@@ -9,7 +9,6 @@ function ClassroomHome() {
   let [courses,setCourses]=useState([])
   let [userCommunityInfo,setUserCommunityInfo]=useState({})
 
-
   const {comm_name}=useParams()
 
   useEffect(()=>{

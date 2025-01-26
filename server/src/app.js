@@ -51,10 +51,10 @@ app.use("/ch",verifyAuth,chatRoutes)
 
 let server=http.createServer(app)
 
-//websocket server
+//chat server
 import {Server} from "socket.io"
 
-let io=new Server(server,{cors: {origin: "http://localhost:5173",methods: ["GET","POST"]}})
+let io=new Server(server,{cors: {origin: "http://localhost:5173",methods: ["GET","POST"]},path: "/p2p"})
 
 io.on("connection",(socket)=>{
     let {send,recv}=socket.handshake.query
@@ -76,8 +76,17 @@ io.on("connection",(socket)=>{
             socket.to(`${send}:${recv}`).emit("chat",msg)
         }
     })
-
     // socket.on("disconnect",()=>console.log(` ${send} disconnected`))
+})
+
+let live=new Server(server,{cors: {origin: "http://localhost:5173",methods: ["GET","POST"]},path: "/live"})
+
+live.on("connection",(socket)=>{
+    let {comm_name}=socket.handshake.query
+    socket.join(`${comm_name}`)
+    socket.on("chat_live",(msg)=>{
+        socket.to(`${comm_name}`).emit("chat_live",msg)
+    })
 })
 
 export {server as app}

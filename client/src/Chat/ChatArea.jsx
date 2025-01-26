@@ -8,7 +8,6 @@ function ChatArea({recv,setSelectedUser}) {
 
   const handleRightClick=(e)=>{
     if(e.type=='contextmenu'){
-      // socket.disconnect()
       setSelectedUser(null)
     }
   }
@@ -47,9 +46,9 @@ function ChatArea({recv,setSelectedUser}) {
         if(data?.success){
           setSend(data?.data)
           if(!socket){
-            socket=io(`http://localhost:8080/?recv=${recv?.user_id}&send=${data?.data?.user_id}`)
+            socket=io(`http://localhost:8080/?recv=${recv?.user_id}&send=${data?.data?.user_id}`,{path: "/p2p"})
             socket.on("chat",(msg)=>{
-              return setMessages(prev=>[...prev,msg])
+              setMessages(prev=>[...prev,msg])
             })
           }
         }

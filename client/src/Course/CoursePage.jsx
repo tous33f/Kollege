@@ -13,11 +13,13 @@ export default function CoursePage() {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [progress, setProgress] = useState(true);
   const [isVideoFormOpen,setIsVideoFormOpen]=useState(false);
+  let [userCommunityInfo,setUserCommunityInfo]=useState({})
   const [course,setCourse]=useState({})
   const [key,setKey]=useState(-1)
   const [curKey,setCurKey]=useState(-1)
 
   useEffect(()=>{
+    //course info
     axios.get(`http://localhost:8080/cr/${comm_name}/${course_id}`,{withCredentials: true})
     .then( ({data})=>{
       if(data.success){
@@ -30,6 +32,7 @@ export default function CoursePage() {
     .catch(({response})=>{
       toast.error(response?.data?.message)
     })
+    //videos
     axios.get(`http://localhost:8080/v/${comm_name}/${course_id}`,{withCredentials: true})
     .then( ({data})=>{
       if(data.success){
@@ -46,6 +49,16 @@ export default function CoursePage() {
     } )
     .catch(({response})=>{
       toast.error(response?.data?.message)
+    })
+    //user community info
+    axios.get(`http://localhost:8080/c/${comm_name}/user_community_info`,{withCredentials: true})
+    .then( ({data})=>{
+      if(data.success){
+        setUserCommunityInfo(data.data)
+      }
+    } )
+    .catch(({response})=>{
+      toast.error(response?.message)
     })
   },[])
 
@@ -112,12 +125,12 @@ export default function CoursePage() {
             </ul>
           </div>}
 
-            <div className="mt-6">
+            { userCommunityInfo?.info?.role!="Member" && <div className="mt-6">
                 <button onClick={()=>setIsVideoFormOpen(true)} 
                 className="w-full bg-slate-900 text-slate-200 font-medium py-2 px-4 rounded-md hover:bg-slate-950 transition duration-200">
                 Add a new video
                 </button>
-            </div>
+            </div>}
 
           </div>
         </div>

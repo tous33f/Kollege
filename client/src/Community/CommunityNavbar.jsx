@@ -20,7 +20,6 @@ function CommunityNavbar() {
   let path=location.pathname.split("/")
   let cur=(path.length>3?path[3]:"home")
   let pages=["home","classroom","events","members","about"]
-  console.log(path)
 
   useEffect(()=>{
 
