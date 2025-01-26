@@ -1,5 +1,5 @@
 
-# Kollege (community learning management system for tutors and learners)
+# Kollege - Community Learning Management System
 
 Ever tired of joining different platforms such as discord, reddit or facebook groups to resolve queries after enrolling in an online course as a learner or having trouble setting up a platform to create an engaging and active community as a tutor?
 
